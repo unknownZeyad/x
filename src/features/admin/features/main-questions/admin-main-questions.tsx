@@ -52,7 +52,7 @@ export function AdminMainQuestions() {
                       alt=""
                     />
                   </div>
-                  <h1 className="text-5xl font-bold text-center uppercase">
+                  <h1 className="text-3xl font-bold text-center uppercase">
                     {currentQuestion.question.question}
                   </h1>
                   <div className="size-24 shrink-0">

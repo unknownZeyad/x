@@ -88,8 +88,8 @@ export function AnswerResultScreen({
                 <div className="flex-1">
                   <img
                     className="rounded-2xl ml-auto w-40 aspect-4/5"
-                    src="/assets/images/barcelona-logo.png"
-                    alt="Footer"
+                    src={answerResult.club.img_url}
+                    alt={answerResult.club.name}
                   />
                 </div>
               </div>

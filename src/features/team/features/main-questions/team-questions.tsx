@@ -15,11 +15,13 @@ import useEmblaCarousel from "embla-carousel-react";
 import { useTeamInfo } from "../../providers/info-provider";
 import { useTeamSocket } from "../../providers/socket-provider";
 import { HoldDialog } from "./hold-dialog";
+import { parse } from "@/core/lib/utils";
 
 export function TeamMainQuestions() {
   const { teamInfo, setTeamInfo } = useTeamInfo();
   const { main_question } = teamInfo;
   const { socket } = useTeamSocket();
+  const [magicCardUsed, setMagicCardUsed] = useState(false);
 
   const [questions, setQuestions] = useState(() => {
     return (
@@ -28,6 +30,7 @@ export function TeamMainQuestions() {
         selectedAnswerId: null as number | null,
         hasTimedOut: false,
         chosen: false,
+        isMagicCardQuestion: false,
       })) ?? []
     );
   });
@@ -40,6 +43,7 @@ export function TeamMainQuestions() {
       questions.find((question) => question.id === currentQuestionId) ?? null
     );
   }, [questions, currentQuestionId]);
+  console.log(currentQuestionId, currentQuestion);
 
   function holdMainQuestion() {
     setTeamInfo((prev) => {
@@ -73,6 +77,7 @@ export function TeamMainQuestions() {
         data: {
           question_id: currentQuestion.id,
           answer_id: answerId,
+          use_magic_card: currentQuestion.isMagicCardQuestion,
         },
       })
     );
@@ -134,6 +139,51 @@ export function TeamMainQuestions() {
     });
   }
 
+  function handleMagicCard() {
+    if (magicCardUsed) return;
+    if (currentQuestion?.hasTimedOut) return;
+    if (!!currentQuestion?.selectedAnswerId) return;
+    if (main_question?.hold) return;
+
+    setMagicCardUsed(true);
+
+    socket?.send(
+      JSON.stringify({
+        event: "choose_main_question",
+        data: {
+          question_id: currentQuestion?.id,
+          use_magic_card: true,
+        },
+      })
+    );
+  }
+
+  useEffect(() => {
+    function onMessage(event: MessageEvent) {
+      const data = parse<ServerTeamMessage>(event.data);
+      if (data.event === "magic_card_question") {
+        setQuestions((prev) => {
+          return prev.map((question) => {
+            if (question.id === currentQuestion?.id) {
+              return {
+                ...question,
+                ...data.data.question,
+                isMagicCardQuestion: true,
+              };
+            }
+            return question;
+          });
+        });
+      }
+    }
+
+    socket?.addEventListener("message", onMessage);
+
+    return () => {
+      socket?.removeEventListener("message", onMessage);
+    };
+  }, [socket, currentQuestion?.id]);
+
   useEffect(() => {
     if (!main_question || !currentQuestion) return;
 
@@ -167,8 +217,8 @@ export function TeamMainQuestions() {
           <PhaseCard>
             <PhaseCardHeader className="flex items-center justify-between">
               <TeamLogo
-                src="/assets/images/barcelona-small-logo.webp"
-                name="Barcelona"
+                src={teamInfo.choosen_club?.img_url ?? ""}
+                name={teamInfo.choosen_club?.name ?? ""}
                 className="text-black flex-1"
               />
               <div className="flex items-end">
@@ -191,6 +241,7 @@ export function TeamMainQuestions() {
                   className="w-48 object-contain aspect-square overflow-hidden"
                   src="/assets/images/magic-card.webp"
                   alt=""
+                  onClick={handleMagicCard}
                 />
                 <QuestionsCarousel
                   onQuestionChange={handleQuestionChange}
