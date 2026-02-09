@@ -14,6 +14,7 @@ import realMadridLogo from '@public/assets/images/real-madrid-logo.png'
 import alNassrLogo from '@public/assets/images/al-nassr-logo.png'
 import barcelonaLogo from '@public/assets/images/barcelona-logo.png'
 import alHilalLogo from '@public/assets/images/al-hilal-logo.png'
+import holdPopupImg from "@public/assets/images/SFG-Pop up Msg's-webp_Artboard 3.webp"
 import { cn, parse } from "@/core/lib/utils";
 
 const teams = [
@@ -23,7 +24,14 @@ const teams = [
     { id: 4, name: "AL HILAL", logo: alHilalLogo },
 ];
 
-export default function ChooseClubs() {
+const logoMap: Record<string, any> = {
+    "REAL MADRID": realMadridLogo,
+    "AL NASSR": alNassrLogo,
+    "BARCELONA": barcelonaLogo,
+    "AL HILAL": alHilalLogo,
+};
+
+export default function ChooseClubs({ hold, otherTeamClub, clubs }: { hold: boolean, otherTeamClub: number | null, clubs: Club[] | null }) {
     const { teamInfo } = useTeamInfo();
     const { socket } = useTeamSocket();
     const [localSelection, setLocalSelection] = useState<number | null>(null);
@@ -34,44 +42,15 @@ export default function ChooseClubs() {
         setLocalSelection(clubId);
     };
 
-    const [_otherTeamChoosenClub, setOtherTeamChoosenClub] = useState<number | null>(null);
-    const [hold, setHold] = useState(false);
     const [isSending, setIsSending] = useState(false);
 
     const isConfirmed = teamInfo?.choosen_club?.id === selectedClub;
 
-    useEffect(() => {
-        if (!socket) return;
-
-        const onMessage = (msg: MessageEvent) => {
-            const parsed = parse<any>(msg.data)
-            console.log('<<< TEAM SOCKET MESSAGE:', parsed);
-
-            if (parsed.event === 'unhold_choosing_club') {
-                console.log('UNHOLD RECEIVED - Setting hold to false');
-                setOtherTeamChoosenClub(parsed.data.choosen_club_id)
-                setHold(false);
-            }
-
-            if (parsed.event === 'view_clubs') {
-                console.log('VIEW_CLUBS RECEIVED - Setting hold to:', parsed.data.hold);
-                setHold(parsed.data.hold);
-            }
-
-            // If the message is a full state update, find the other team's club
-            if (parsed.team1 && parsed.team2) {
-                const ourClubId = teamInfo?.choosen_club?.id || localSelection;
-                if (parsed.team1.choosen_club?.id && parsed.team1.choosen_club.id !== ourClubId) {
-                    setOtherTeamChoosenClub(parsed.team1.choosen_club.id);
-                } else if (parsed.team2.choosen_club?.id && parsed.team2.choosen_club.id !== ourClubId) {
-                    setOtherTeamChoosenClub(parsed.team2.choosen_club.id);
-                }
-            }
-        };
-
-        socket.addEventListener('message', onMessage);
-        return () => socket.removeEventListener('message', onMessage);
-    }, [socket, teamInfo, localSelection])
+    // Use the clubs from props or fallback to hardcoded if null
+    const displayedClubs = clubs ? clubs.map(c => ({
+        ...c,
+        logo: c.img_url || logoMap[c.name.toUpperCase()] || realMadridLogo
+    })) : teams;
 
     // Reset isSending when teamInfo updates to match our selection or if it's different
     useEffect(() => {
@@ -167,19 +146,20 @@ export default function ChooseClubs() {
 
                         <div className="relative flex-1 max-w-4xl">
 
-                            <div className='p-20 rounded-b-xl bg-cover bg-no-repeat' style={{ backgroundImage: `url(${chooseYourTeamImg.src})` }}>
+                            <div className='relative p-20 rounded-b-xl bg-cover bg-no-repeat' style={{ backgroundImage: `url(${chooseYourTeamImg.src})` }}>
                                 <div className='grid grid-cols-4 gap-6 mb-8'>
-                                    {teams.map((team) => {
-                                        const isLocked = _otherTeamChoosenClub === team.id && teamInfo.choosen_club?.id !== team.id;
+                                    {displayedClubs.map((team) => {
+                                        const isLocked = otherTeamClub === team.id && teamInfo.choosen_club?.id !== team.id;
                                         return (
                                             <div
                                                 key={team.id}
-                                                onClick={() => !isLocked && !isConfirmed && handleSelectClub(team.id)}
+                                                onClick={() => !isLocked && !isConfirmed && !hold && handleSelectClub(team.id)}
                                                 className={cn(
                                                     "relative cursor-pointer transition-all duration-300 transform",
                                                     selectedClub === team.id && "scale-105",
                                                     isLocked && "opacity-40 grayscale blur-[1px] pointer-events-none scale-95",
-                                                    !isLocked && !isConfirmed && "hover:scale-105"
+                                                    hold && "opacity-40 grayscale brightness-50 pointer-events-none",
+                                                    !isLocked && !isConfirmed && !hold && "hover:scale-105"
                                                 )}
                                             >
                                                 <div className='rounded-xl  mb-3'>
@@ -209,6 +189,18 @@ export default function ChooseClubs() {
                                         );
                                     })}
                                 </div>
+
+                                {hold && (
+                                    <div className="absolute inset-0 z-50 flex items-center justify-center p-8 pointer-events-none animate-in fade-in zoom-in duration-300">
+                                        <Image
+                                            src={holdPopupImg}
+                                            width={500}
+                                            height={300}
+                                            alt="Waiting for turn"
+                                            className="object-contain drop-shadow-2xl"
+                                        />
+                                    </div>
+                                )}
 
                                 <div className='flex justify-center'>
                                     <button

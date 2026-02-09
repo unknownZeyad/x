@@ -9,12 +9,14 @@ import ContentLayout from '@/core/components/layout/content-layout'
 import SpeedWinnerCard from '@/core/components/derived/speed-winner-card'
 import { AnimatePresence } from 'motion/react'
 import person from '@public/assets/images/person.png'
+import { useAdminPhases } from '../../providers/admin-phases-provider'
 
 function SpeedQuestion() {
   const { socket } = useAdminSocket()
   const [question, setQuestion] = useState<SpeedQuestion | null>(null)
   const [deliveryDate, setDeliveryDate] = useState<number>(0)
   const [winner, setWinner] = useState<string | null>(null)
+  const { setPhase } = useAdminPhases()
 
   useEffect(() => {
     socket?.addEventListener('message', (msg) => {
@@ -33,6 +35,7 @@ function SpeedQuestion() {
 
   function handleNext() {
     socket?.send(JSON.stringify({ event: 'start_choosing_clubs' }))
+    setPhase('choosing_clubs')
   }
 
   return (

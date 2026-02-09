@@ -2,6 +2,7 @@
 
 import { AnimatePresence } from "motion/react";
 import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
 import { useTeamSocket } from "../providers/socket-provider";
 import { useTeamPhases } from "../providers/phases-provider";
 import Wating from "./wating/wating";
@@ -18,8 +19,11 @@ export default function Team() {
     const [deliveryDate, setDeliveryDate] = useState<number>(0)
     const [winner, setWinner] = useState<string | null>(null)
     const [clubs, setClubs] = useState<Club[] | null>(null)
+    const [hold, setHold] = useState(false)
+    const [otherTeamClub, setOtherTeamClub] = useState<number | null>(null)
     const { phase, setPhase } = useTeamPhases();
     const { socket } = useTeamSocket();
+    const { team: teamId } = useParams<{ team: string }>();
 
     useEffect(() => {
         socket?.addEventListener('message', ({ data }) => {
@@ -37,9 +41,22 @@ export default function Team() {
             if (parsed.event === 'view_clubs') {
                 setPhase('choose_clubs')
                 setClubs(parsed.data.clubs)
+                setHold(parsed.data.hold)
+            }
+            if (parsed.event === 'unhold_choosing_club') {
+                setOtherTeamClub(parsed.data.choosen_club_id)
+                setHold(false)
+            }
+
+            if (parsed.team1 && parsed.team2) {
+                if (teamId === 'team1') {
+                    setOtherTeamClub(parsed.team2.choosen_club?.id || null);
+                } else if (teamId === 'team2') {
+                    setOtherTeamClub(parsed.team1.choosen_club?.id || null);
+                }
             }
         })
-    }, [socket])
+    }, [socket, teamId])
 
     return (
         <div className="w-full h-screen bg-black">
@@ -47,7 +64,7 @@ export default function Team() {
                 {phase === "wating" && <Wating key="wating" />}
                 {phase === "welcome" && <Welcomes key="welcomes" />}
                 {(phase === "speed_question" && (question)) && <SpeedQuestion winner={winner} key="speed_question" deliveryDate={deliveryDate} answers={question.answers} question={question.question} interactive={true} />}
-                {phase === "choose_clubs" && <ChooseClubs key="choose-clubs" />}
+                {phase === "choose_clubs" && <ChooseClubs key="choose-clubs" hold={hold} otherTeamClub={otherTeamClub} clubs={clubs} />}
                 {phase === "main_questions" && <TeamMainQuestions key="main-questions" />}
             </AnimatePresence>
         </div>
