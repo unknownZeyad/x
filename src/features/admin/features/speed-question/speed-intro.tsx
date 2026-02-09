@@ -13,7 +13,7 @@ function SpeedIntro() {
       event: 'start_speed_question',
       data: null
     }))
-    
+
   }
 
   return (

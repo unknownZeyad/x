@@ -2,7 +2,6 @@
 
 import { AnimatePresence, motion } from "motion/react";
 import { useAdminPhases } from "@/features/admin/providers/admin-phases-provider";
-import Welcome from "@/features/admin/features/welcome/welcome";
 import StartExperince from "./start-experience/start-experience";
 import { useEffect, useState } from "react";
 import { useAdminSocket } from "../providers/admin-socket-provider";

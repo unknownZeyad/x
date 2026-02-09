@@ -1,4 +1,4 @@
-import WelcomingVideos from '@/features/admin/features/intro'
+import WelcomingVideos from '@/core/components/derived/welcoming-videos'
 import { useState } from 'react'
 import TeamWelcome from './team-welcome'
 import { AnimatePresence } from 'motion/react'
