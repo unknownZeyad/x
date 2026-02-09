@@ -10,7 +10,6 @@ import logo from '@public/assets/images/Sobi-Fantasy-Game-Logo.webp'
 import { useTeamInfo } from "../../providers/info-provider";
 import { useTeamSocket } from "../../providers/socket-provider";
 
-// Team logo imports
 import realMadridLogo from '@public/assets/images/real-madrid-logo.png'
 import alNassrLogo from '@public/assets/images/al-nassr-logo.png'
 import barcelonaLogo from '@public/assets/images/barcelona-logo.png'

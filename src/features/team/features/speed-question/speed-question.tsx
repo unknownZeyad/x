@@ -1,6 +1,11 @@
 import EnterExit from '@/core/components/derived/enter-exit'
 import SpeedCard from '@/core/components/derived/speed-card'
 import { useTeamSocket } from '../../providers/socket-provider'
+import GameButton from '@/core/components/derived/game-button'
+import ContentLayout from '@/core/components/layout/content-layout'
+import SpeedWinnerCard from '@/core/components/derived/speed-winner-card'
+import person from '@public/assets/images/person.png'
+import { AnimatePresence } from 'motion/react'
 
 function SpeedQuestion({
   deliveryDate,
@@ -31,16 +36,26 @@ function SpeedQuestion({
   }
 
   return (
-    <EnterExit key='speed_question'>
-      <SpeedCard
-        deliveryDate={deliveryDate}
-        answers={answers}
-        question={question}
-        onAnswer={onAnswer}
-        interactive={interactive}
-        winner={winner}
-      />
-    </EnterExit>
+    <AnimatePresence mode='wait'>
+      {(question && !winner) && (
+        <EnterExit key='speed_question'>
+          <SpeedCard
+            deliveryDate={deliveryDate}
+            answers={answers}
+            question={question}
+            onAnswer={onAnswer}
+            interactive={interactive}
+          />
+        </EnterExit>
+      )}
+      {winner && (
+        <EnterExit key='winner'>
+          <ContentLayout personSrc={person.src}>
+            <SpeedWinnerCard winner={winner} />
+          </ContentLayout>
+        </EnterExit>
+      )}
+    </AnimatePresence>
   )
 }
 

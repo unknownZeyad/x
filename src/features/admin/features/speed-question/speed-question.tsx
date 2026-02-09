@@ -4,6 +4,11 @@ import { useAdminSocket } from '../../providers/admin-socket-provider'
 import SpeedIntro from './speed-intro'
 import EnterExit from '@/core/components/derived/enter-exit'
 import SpeedCard from '@/core/components/derived/speed-card'
+import GameButton from '@/core/components/derived/game-button'
+import ContentLayout from '@/core/components/layout/content-layout'
+import SpeedWinnerCard from '@/core/components/derived/speed-winner-card'
+import { AnimatePresence } from 'motion/react'
+import person from '@public/assets/images/person.png'
 
 function SpeedQuestion() {
   const { socket } = useAdminSocket()
@@ -25,21 +30,38 @@ function SpeedQuestion() {
     })
   }, [socket])
 
+
+  function handleNext() {
+    socket?.send(JSON.stringify({ event: 'start_choosing_clubs' }))
+  }
+
   return (
-    <div className='relative w-full h-full'>
+    <AnimatePresence mode='wait'>
       {!question && <SpeedIntro key='intro' />}
-      {question && (
+      {(question && !winner) && (
         <EnterExit key='card'>
           <SpeedCard
             deliveryDate={deliveryDate}
             interactive={false}
             answers={question.answers}
             question={question.question}
-            winner={winner}
           />
         </EnterExit>
       )}
-    </div>
+      {winner && (
+        <EnterExit key='winner'>
+          <ContentLayout personSrc={person.src}>
+            <div className='flex flex-col pt-23 items-center gap-4'>
+              <SpeedWinnerCard winner={winner} />
+              <GameButton
+                className='ml-auto mt-3'
+                onClick={handleNext}
+              >Next</GameButton>
+            </div>
+          </ContentLayout>
+        </EnterExit>
+      )}
+    </AnimatePresence>
   )
 }
 

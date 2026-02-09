@@ -16,6 +16,7 @@ export default function Team() {
     const [question, setQuestion] = useState<SpeedQuestion | null>(null)
     const [deliveryDate, setDeliveryDate] = useState<number>(0)
     const [winner, setWinner] = useState<string | null>(null)
+    const [clubs, setClubs] = useState<Club[] | null>(null)
     const { phase, setPhase } = useTeamPhases();
     const { socket } = useTeamSocket();
 
@@ -32,6 +33,10 @@ export default function Team() {
             if (parsed.event === 'speed_question_winner') {
                 setWinner(parsed.data.team_name)
             }
+            if (parsed.event === 'view_clubs') {
+                setPhase('choose_clubs')
+                setClubs(parsed.data.clubs)
+            }
         })
     }, [socket])
 
@@ -40,7 +45,7 @@ export default function Team() {
             <AnimatePresence mode="wait">
                 {phase === "wating" && <Wating key="wating" />}
                 {phase === "welcome" && <Welcomes key="welcomes" />}
-                {(phase === "speed_question" && question) && <SpeedQuestion winner={winner} key="speed_question" deliveryDate={deliveryDate} answers={question.answers} question={question.question} interactive={true} />}
+                {(phase === "speed_question" && (question)) && <SpeedQuestion winner={winner} key="speed_question" deliveryDate={deliveryDate} answers={question.answers} question={question.question} interactive={true} />}
                 {phase === "choose_clubs" && <ChooseClubs key="choose-clubs" />}
             </AnimatePresence>
         </div>
