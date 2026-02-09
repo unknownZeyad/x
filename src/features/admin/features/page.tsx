@@ -8,6 +8,7 @@ import { useAdminSocket } from "../providers/admin-socket-provider";
 import { parse } from "@/core/lib/utils";
 import SpeedQuestion from "./speed-question/speed-question";
 import ChosenClubs from "./chosen-clubs/chosen-clubs";
+import { AdminMainQuestions } from "./main-questions/admin-main-questions";
 
 export default function Admin() {
   const { phase, setPhase } = useAdminPhases();
@@ -65,6 +66,7 @@ export default function Admin() {
         {phase === "chosen_clubs" && (
           <ChosenClubs key="chosen_clubs" state={gameState} />
         )}
+        {phase === "main_questions" && <AdminMainQuestions />}
 
       </AnimatePresence>
     </div>
