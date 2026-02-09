@@ -32,8 +32,7 @@ export default function AdminPhasesProvider({
 }: {
     children: React.ReactNode;
 }) {
-    const [phase, setPhase] = useState<AdminPhases>("main_questions");
-    // const [phase, setPhase] = useState<AdminPhases>("start_experience");
+    const [phase, setPhase] = useState<AdminPhases>("start_experience");
 
     return (
         <Context.Provider value={{ phase, setPhase }}>
