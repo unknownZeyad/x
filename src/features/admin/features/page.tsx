@@ -2,12 +2,12 @@
 
 import { AnimatePresence, motion } from "motion/react";
 import { useAdminPhases } from "@/features/admin/providers/admin-phases-provider";
-import Welcome from "@/features/admin/features/welcome/welcome";
 import StartExperince from "./start-experience/start-experience";
 import { useEffect } from "react";
 import { useAdminSocket } from "../providers/admin-socket-provider";
 import { parse } from "@/core/lib/utils";
 import SpeedQuestion from "./speed-question/speed-question";
+import Welcome from "./welcome/welcome";
 
 export default function Admin() {
   const { phase, setPhase } = useAdminPhases();

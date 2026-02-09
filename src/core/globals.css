@@ -14,10 +14,12 @@
     height: 4px;
     transform: translateY(-0px);
   }
+
   50% {
     height: 16px;
     transform: translateY(-4px);
   }
+
   100% {
     height: 4px;
     transform: translateY(-0px);
