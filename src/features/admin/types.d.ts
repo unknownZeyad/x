@@ -27,4 +27,11 @@ declare type ServerAdminMessage =
       },
       [key: string]: any
     }
+  } |
+  {
+    event: 'speed_question_winner',
+    data: {
+      team: string,
+      team_name: string
+    }
   }
