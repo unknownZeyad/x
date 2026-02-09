@@ -12,11 +12,17 @@ import { TeamLogo } from "@/core/components/ui/team-logo";
 import { useAdminSocket } from "../../providers/admin-socket-provider";
 import { useLayoutEffect } from "react";
 import { useAdminPhases } from "../../providers/admin-phases-provider";
+import { useAudio } from "@/core/providers/audio-provider";
 
 export function ChoosingClub() {
   const { team1, team2 } = useTeams();
   const { socket } = useAdminSocket();
   const { setPhase } = useAdminPhases();
+  const { playAudio, stopAudio } = useAudio()
+
+  useLayoutEffect(() => {
+    playAudio('/assets/audios/Team Selection/Team Name Selection.mp3')
+  }, []);
 
   useLayoutEffect(() => {
     if (!socket) return;
@@ -29,6 +35,7 @@ export function ChoosingClub() {
       })
     );
     setPhase("main_questions");
+    stopAudio()
   }
 
   return (

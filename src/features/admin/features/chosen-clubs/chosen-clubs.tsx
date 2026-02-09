@@ -4,6 +4,7 @@ import { useAdminSocket } from "../../providers/admin-socket-provider";
 import { useEffect, useState } from "react";
 import { parse } from "@/core/lib/utils";
 import backgroundImg from '@public/assets/images/background_Img.png';
+import { useAudio } from "@/core/providers/audio-provider";
 
 export default function ChosenClubs() {
 
@@ -12,6 +13,11 @@ export default function ChosenClubs() {
         team1: Club | null,
         team2: Club | null
     } | null>(null)
+    const { playAudio } = useAudio()
+
+    useEffect(() => {
+        playAudio('/assets/audios/Team Selection/Team Name Selection.mp3')
+    }, []);
 
     useEffect(() => {
         socket?.addEventListener('message', (msg) => {

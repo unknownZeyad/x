@@ -10,6 +10,7 @@ import SpeedWinnerCard from '@/core/components/derived/speed-winner-card'
 import { AnimatePresence } from 'motion/react'
 import person from '@public/assets/images/person.png'
 import { useAdminPhases } from '../../providers/admin-phases-provider'
+import { useAudio } from '@/core/providers/audio-provider'
 
 function SpeedQuestion() {
   const { socket } = useAdminSocket()
@@ -17,6 +18,7 @@ function SpeedQuestion() {
   const [deliveryDate, setDeliveryDate] = useState<number>(0)
   const { setPhase } = useAdminPhases()
   const [winner, setWinner] = useState<string | null>(null)
+  const { playAudio, stopAudio } = useAudio()
 
   useEffect(() => {
     socket?.addEventListener('message', (msg) => {
@@ -28,6 +30,15 @@ function SpeedQuestion() {
 
       if (parsed.event === 'speed_question_winner') {
         setWinner(parsed.data.team_name)
+        let audioPath = ''
+        if (parsed.data.team === 'team1') {
+          audioPath = '/assets/audios/Speed Question Winner/Speed Question winner Team A.mp3'
+        } else if (parsed.data.team === 'team2') {
+          audioPath = '/assets/audios/Speed Question Winner/Speed Question winner Team B.mp3'
+        } else {
+          audioPath = '/assets/audios/Wrong Answers/Wrong answers_opt 2.mp3'
+        }
+        playAudio(audioPath)
       }
     })
   }, [socket])
@@ -35,7 +46,8 @@ function SpeedQuestion() {
 
   function handleNext() {
     socket?.send(JSON.stringify({ event: 'start_choosing_clubs' }))
-    setPhase('chosen_clubs')
+    setPhase('choosing_clubs')
+    stopAudio()
   }
 
   return (
