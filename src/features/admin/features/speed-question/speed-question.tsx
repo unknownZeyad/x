@@ -10,7 +10,7 @@ function SpeedQuestion() {
 
   useEffect(() => {
     socket?.addEventListener('message', (msg) => {
-      const parsed = parse<ServerAdminMessage>(msg)
+      const parsed = parse<ServerAdminMessage>(msg.data)
       if (parsed.event === 'view_speed_question') {
         setQuestion(parsed.data.question)
       }

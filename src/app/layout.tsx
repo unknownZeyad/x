@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   title: "SOBI Fantasy Game",
   description: "SOBI Fantasy Game",
   icons: {
-    icon: "/icons/Sobi-Fantasy-Game-Logo.webp",
+    icon: "/assets/images/Sobi-Fantasy-Game-Logo.webp",
   },
 };
 

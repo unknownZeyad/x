@@ -13,4 +13,18 @@ declare type ServerAdminMessage =
       date: number,
       question: SpeedQuestion
     }
-  } 
+  } |
+  {
+    event: 'clubs_chosen',
+    data: {
+      team1: {
+        choosen_club: Club,
+        [key: string]: any
+      },
+      team2: {
+        choosen_club: Club,
+        [key: string]: any
+      },
+      [key: string]: any
+    }
+  }

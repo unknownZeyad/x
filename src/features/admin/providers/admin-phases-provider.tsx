@@ -7,6 +7,7 @@ type AdminPhases =
     'intro' |
     'speed_question' |
     'choosing_clubs' |
+    'chosen_clubs' |
     'main_questions' |
     'winner'
 

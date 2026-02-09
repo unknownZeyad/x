@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useLayoutEffect, useState } from "react";
+import { createContext, useContext, useLayoutEffect, useState, useRef } from "react";
 
 const Context = createContext<{
     socket: WebSocket | null;
@@ -23,16 +23,40 @@ export default function AdminSocketProvider({
 }) {
     const [socket, setSocket] = useState<null | WebSocket>(null);
 
+    const reconnectTimeoutRef = useRef<NodeJS.Timeout>(null);
+
     useLayoutEffect(() => {
-        setSocket(new WebSocket(
-            `ws://localhost:3000?role=admin&app_name=c3g`
-        ))
+        let ws: WebSocket;
+
+        const connect = () => {
+            ws = new WebSocket(`ws://localhost:3000?role=admin&app_name=c3g`);
+
+            ws.onopen = () => {
+                console.log('ADMIN SOCKET CONNECTED');
+                setSocket(ws);
+            };
+
+            ws.onclose = () => {
+                console.log('ADMIN SOCKET DISCONNECTED - Reconnecting in 2s...');
+                setSocket(null);
+                reconnectTimeoutRef.current = setTimeout(connect, 2000);
+            };
+
+            ws.onerror = (err) => {
+                console.error('ADMIN SOCKET ERROR:', err);
+                ws.close();
+            };
+        };
+
+        connect();
 
         return () => {
-            if (socket) {
-                socket.close();
-                setSocket(null);
+            if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
+            if (ws) {
+                ws.onclose = null;
+                ws.close();
             }
+            setSocket(null);
         };
     }, []);
 

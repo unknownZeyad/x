@@ -15,7 +15,7 @@ import realMadridLogo from '@public/assets/images/real-madrid-logo.png'
 import alNassrLogo from '@public/assets/images/al-nassr-logo.png'
 import barcelonaLogo from '@public/assets/images/barcelona-logo.png'
 import alHilalLogo from '@public/assets/images/al-hilal-logo.png'
-import { parse } from "@/core/lib/utils";
+import { cn, parse } from "@/core/lib/utils";
 
 const teams = [
     { id: 1, name: "REAL MADRID", logo: realMadridLogo },
@@ -35,24 +35,95 @@ export default function ChooseClubs() {
         setLocalSelection(clubId);
     };
 
-    const handleConfirm = () => {
-        if (selectedClub && socket) {
-            socket.send(JSON.stringify({
+    const [_otherTeamChoosenClub, setOtherTeamChoosenClub] = useState<number | null>(null);
+    const [hold, setHold] = useState(false);
+    const [isSending, setIsSending] = useState(false);
+
+    const isConfirmed = teamInfo?.choosen_club?.id === selectedClub;
+
+    useEffect(() => {
+        if (!socket) return;
+
+        const onMessage = (msg: MessageEvent) => {
+            const parsed = parse<any>(msg.data)
+            console.log('<<< TEAM SOCKET MESSAGE:', parsed);
+
+            if (parsed.event === 'unhold_choosing_club') {
+                console.log('UNHOLD RECEIVED - Setting hold to false');
+                setOtherTeamChoosenClub(parsed.data.choosen_club_id)
+                setHold(false);
+            }
+
+            if (parsed.event === 'view_clubs') {
+                console.log('VIEW_CLUBS RECEIVED - Setting hold to:', parsed.data.hold);
+                setHold(parsed.data.hold);
+            }
+
+            // If the message is a full state update, find the other team's club
+            if (parsed.team1 && parsed.team2) {
+                const ourClubId = teamInfo?.choosen_club?.id || localSelection;
+                if (parsed.team1.choosen_club?.id && parsed.team1.choosen_club.id !== ourClubId) {
+                    setOtherTeamChoosenClub(parsed.team1.choosen_club.id);
+                } else if (parsed.team2.choosen_club?.id && parsed.team2.choosen_club.id !== ourClubId) {
+                    setOtherTeamChoosenClub(parsed.team2.choosen_club.id);
+                }
+            }
+        };
+
+        socket.addEventListener('message', onMessage);
+        return () => socket.removeEventListener('message', onMessage);
+    }, [socket, teamInfo, localSelection])
+
+    // Reset isSending when teamInfo updates to match our selection or if it's different
+    useEffect(() => {
+        setIsSending(false);
+    }, [teamInfo?.choosen_club?.id]);
+
+    const handleConfirm = (e?: React.MouseEvent) => {
+        if (e) e.preventDefault();
+
+        const socketReady = socket?.readyState === WebSocket.OPEN;
+        console.log('>>> CONFIRM CLICKED', {
+            selectedClub,
+            hasSocket: !!socket,
+            socketReady,
+            isConfirmed,
+            hold,
+            isSending
+        });
+
+        // ONLY block if mandatory things are missing (socket or selection)
+        // We remove 'isConfirmed' and 'hold' from this guard to allow re-sending if it feels stuck.
+        if (!selectedClub || !socket || !socketReady || isSending) {
+            console.warn('>>> CONFIRM BLOCKED - Essential missing:', {
+                noClubSelected: !selectedClub,
+                noSocketObject: !socket,
+                socketNotOpen: !socketReady,
+                currentlySending: isSending
+            });
+            return;
+        }
+
+        try {
+            setIsSending(true);
+            const message = JSON.stringify({
                 event: 'choose_club',
                 data: { club_id: selectedClub }
-            }));
+            });
+            console.log('>>> SENDING TO SOCKET:', message);
+            socket.send(message);
+            console.log('>>> MESSAGE DISPATCHED');
+
+            // Safety timeout: reset sending state after 2 seconds no matter what
+            setTimeout(() => {
+                setIsSending(false);
+                console.log('>>> SENDING TIMEOUT - State reset');
+            }, 2000);
+        } catch (error) {
+            console.error('>>> SEND ERROR:', error);
+            setIsSending(false);
         }
     };
-    
-    const [_choosenClub, setchoosenClub] = useState<number | null>(null)
-    useEffect(() => {
-        socket?.addEventListener('message', (msg) => {
-            const parsed = parse<ServerTeamMessage>(msg.data)
-            if (parsed.event === 'unhold_choosing_club') {
-                setchoosenClub(parsed.data.choosen_club_id)
-            }
-        })
-    }, [])
 
     return (
         <EnterExit>
@@ -61,6 +132,16 @@ export default function ChooseClubs() {
                 style={{ backgroundImage: `url(${backgroundImg.src})` }}
             >
                 <div className="container mx-auto min-h-screen flex flex-col items-center justify-center px-8">
+                    <div className="absolute top-6 left-6 z-20 flex items-center gap-2">
+                        <div className={cn(
+                            "w-3 h-3 rounded-full animate-pulse",
+                            socket?.readyState === WebSocket.OPEN ? "bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.8)]" : "bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.8)]"
+                        )} />
+                        <span className="text-[10px] font-bold text-white/50 uppercase tracking-widest">
+                            {socket?.readyState === WebSocket.OPEN ? "Online" : "Disconnected"}
+                        </span>
+                    </div>
+
                     <Image
                         src={logo || ""}
                         width={120}
@@ -89,51 +170,76 @@ export default function ChooseClubs() {
 
                             <div className='p-20 rounded-b-xl bg-cover bg-no-repeat' style={{ backgroundImage: `url(${chooseYourTeamImg.src})` }}>
                                 <div className='grid grid-cols-4 gap-6 mb-8'>
-                                    {teams.map((team) => (
-                                        <div
-                                            key={team.id}
-                                            onClick={() => handleSelectClub(team.id)}
-                                            className={`
-                                                relative cursor-pointer transition-all duration-300 transform hover:scale-105
-                                                ${selectedClub === team.id ? 'scale-105' : ''}
-                                            `}
-                                        >
-
-                                            <div className='rounded-xl  mb-3'>
-                                                <Image
-                                                    src={team.logo}
-                                                    width={120}
-                                                    height={120}
-                                                    alt={`${team.name} logo`}
-                                                    className='object-contain rounded-2xl w-full'
-                                                />
-                                            </div>
-
-
-
-                                            {selectedClub === team.id && (
-                                                <div className='absolute -top-6 left-1/2 transform rotate-180 -translate-x-1/2 z-10 animate-bounce'>
-                                                    <div className='w-0 h-0 border-l-12 border-l-transparent border-r-12 border-r-transparent border-b-16 border-b-green-500 drop-shadow-xl'></div>
+                                    {teams.map((team) => {
+                                        const isLocked = _otherTeamChoosenClub === team.id && teamInfo.choosen_club?.id !== team.id;
+                                        return (
+                                            <div
+                                                key={team.id}
+                                                onClick={() => !isLocked && !isConfirmed && handleSelectClub(team.id)}
+                                                className={cn(
+                                                    "relative cursor-pointer transition-all duration-300 transform",
+                                                    selectedClub === team.id && "scale-105",
+                                                    isLocked && "opacity-40 grayscale blur-[1px] pointer-events-none scale-95",
+                                                    !isLocked && !isConfirmed && "hover:scale-105"
+                                                )}
+                                            >
+                                                <div className='rounded-xl  mb-3'>
+                                                    <Image
+                                                        src={team.logo}
+                                                        width={120}
+                                                        height={120}
+                                                        alt={`${team.name} logo`}
+                                                        className='object-contain rounded-2xl w-full'
+                                                    />
                                                 </div>
-                                            )}
-                                        </div>
-                                    ))}
+
+                                                {selectedClub === team.id && (
+                                                    <div className='absolute -top-6 left-1/2 transform rotate-180 -translate-x-1/2 z-10 animate-bounce'>
+                                                        <div className='w-0 h-0 border-l-12 border-l-transparent border-r-12 border-r-transparent border-b-16 border-b-green-500 drop-shadow-xl'></div>
+                                                    </div>
+                                                )}
+
+                                                {isLocked && (
+                                                    <div className="absolute inset-0 flex items-center justify-center z-20">
+                                                        <div className="bg-black/60 px-2 py-1 rounded text-[10px] font-bold text-white uppercase tracking-tighter border border-white/20 backdrop-blur-sm">
+                                                            TAKEN
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
                                 </div>
 
                                 <div className='flex justify-center'>
                                     <button
-                                        disabled={!selectedClub}
+                                        type="button"
+                                        disabled={!selectedClub || isSending || socket?.readyState !== WebSocket.OPEN}
                                         onClick={handleConfirm}
-                                        className={`
-                                            px-20 py-2 rounded-full text-white font-bold text-lg cursor-pointer border-2 border-amber-400
-                                            transition-all duration-300 transform hover:scale-105
-                                            ${selectedClub
-                                                ? 'bg-linear-to-r from-green-400 to-green-500 hover:from-green-500 hover:to-green-600 shadow-lg hover:shadow-green-500/50'
-                                                : 'bg-gray-600 cursor-not-allowed opacity-50'
-                                            }
-                                        `}
+                                        className={cn(
+                                            "relative z-50 px-20 py-3 rounded-full text-white font-bold text-lg cursor-pointer border-2 border-amber-400 transition-all duration-300 transform active:scale-95",
+                                            selectedClub
+                                                ? isConfirmed
+                                                    ? "bg-amber-600 border-amber-300 opacity-80 cursor-default"
+                                                    : (hold || isSending)
+                                                        ? "bg-gray-600 border-gray-500 opacity-50 font-normal italic cursor-wait"
+                                                        : socket?.readyState === WebSocket.OPEN
+                                                            ? "bg-linear-to-r from-green-400 to-green-500 hover:from-green-500 hover:to-green-600 shadow-xl hover:shadow-green-500/50"
+                                                            : "bg-gray-600 cursor-not-allowed opacity-50 font-normal italic"
+                                                : "bg-gray-600 cursor-not-allowed opacity-50"
+                                        )}
                                     >
-                                        CONFIRM
+                                        <span className="relative z-10">
+                                            {isConfirmed
+                                                ? "✓ CONFIRMED"
+                                                : isSending
+                                                    ? "SENDING..."
+                                                    : hold
+                                                        ? "WAITING FOR TURN"
+                                                        : socket?.readyState === WebSocket.OPEN
+                                                            ? "CONFIRM CHOICE"
+                                                            : "CONNECTING..."}
+                                        </span>
                                     </button>
                                 </div>
 
