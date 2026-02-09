@@ -11,6 +11,7 @@ import { parse } from "@/core/lib/utils";
 import EnterExit from "@/core/components/derived/enter-exit";
 import SpeedCard from "@/core/components/derived/speed-card";
 import SpeedQuestion from "./speed-question/speed-question";
+import { TeamMainQuestions } from "./main-questions/team-questions";
 
 export default function Team() {
     const [question, setQuestion] = useState<SpeedQuestion | null>(null)
@@ -47,6 +48,7 @@ export default function Team() {
                 {phase === "welcome" && <Welcomes key="welcomes" />}
                 {(phase === "speed_question" && (question)) && <SpeedQuestion winner={winner} key="speed_question" deliveryDate={deliveryDate} answers={question.answers} question={question.question} interactive={true} />}
                 {phase === "choose_clubs" && <ChooseClubs key="choose-clubs" />}
+                {phase === "main_questions" && <TeamMainQuestions key="main-questions" />}
             </AnimatePresence>
         </div>
     );
