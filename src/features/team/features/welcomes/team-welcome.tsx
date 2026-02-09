@@ -13,7 +13,7 @@ export default function TeamWelcome() {
                 className="absolute inset-0 w-full h-full object-cover"
                 autoPlay
                 playsInline
-                // muted
+                muted
                 preload="auto"
                 initial={{ opacity: 0, scale: 1.05, filter: "blur(16px)" }}
                 animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
