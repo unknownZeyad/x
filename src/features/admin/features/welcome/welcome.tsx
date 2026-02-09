@@ -4,7 +4,7 @@ import { AnimatePresence } from 'motion/react'
 import Explain from './explain'
 
 function Welcome() {
-  const [finsihedWelcomingVids, setFinishedWelcomingVids] = useState<boolean>(false)
+  const [finsihedWelcomingVids, setFinishedWelcomingVids] = useState<boolean>(true) /// just to skip, must be returned to be false
 
   return (
     <AnimatePresence mode='wait'>
