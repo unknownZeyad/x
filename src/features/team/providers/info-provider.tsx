@@ -1,22 +1,33 @@
-import { createContext, useContext, useLayoutEffect, useRef, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import { useParams } from "next/navigation";
 import { useTeamSocket } from "./socket-provider";
 import { parse } from "@/core/lib/utils";
+import { useTeamPhases } from "./phases-provider";
 
 type TeamInfo = {
-  score: number,
-  won_phase1: boolean,
-  used_magic_card: boolean,
-  name: string,
-  choosen_club: Club | null
-}
+  score: number;
+  won_phase1: boolean;
+  used_magic_card: boolean;
+  name: string;
+  choosen_club: Club | null;
+  main_question: {
+    hold: boolean;
+    questions: MainQuestion[];
+  } | null;
+};
 
 const Context = createContext<{
   setTeamInfo: React.Dispatch<React.SetStateAction<TeamInfo>>;
-  teamInfo: TeamInfo,
+  teamInfo: TeamInfo;
 }>({
-  setTeamInfo: () => { },
-  teamInfo: null!
+  setTeamInfo: () => {},
+  teamInfo: null!,
 });
 
 export const useTeamInfo = () => {
@@ -32,13 +43,15 @@ export default function TeamInfoProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const { socket } = useTeamSocket()
+  const { socket } = useTeamSocket();
+  const { setPhase } = useTeamPhases();
   const [teamInfo, setTeamInfo] = useState<TeamInfo>({
     choosen_club: null,
-    name: '',
+    name: "",
     score: 0,
     used_magic_card: false,
-    won_phase1: false
+    won_phase1: false,
+    main_question: null,
   });
 
   const { team: teamId } = useParams<{ team: string }>();
@@ -47,26 +60,41 @@ export default function TeamInfoProvider({
     if (!socket) return;
 
     const onMessage = ({ data }: MessageEvent) => {
-      const parsed = parse<any>(data)
+      const parsed = parse<ServerTeamMessage>(data);
 
       // Handle the specific 'your_team' event
-      if (parsed.event === 'your_team') {
-        setTeamInfo(parsed.data)
+      if (parsed.event === "your_team") {
+        setTeamInfo(parsed.data);
       }
 
       // Handle full state updates
       if (parsed.team1 && parsed.team2) {
-        if (teamId === 'team1') {
+        if (teamId === "team1") {
           setTeamInfo(parsed.team1);
-        } else if (teamId === 'team2') {
+        } else if (teamId === "team2") {
           setTeamInfo(parsed.team2);
         }
       }
     };
 
-    socket.addEventListener('message', onMessage);
-    return () => socket.removeEventListener('message', onMessage);
-  }, [socket, teamId])
+    socket.addEventListener("message", onMessage);
+    return () => socket.removeEventListener("message", onMessage);
+  }, [socket, teamId]);
+
+  useLayoutEffect(() => {
+    if (!socket) return;
+
+    const onMessage = ({ data }: MessageEvent) => {
+      const parsed = parse<ServerTeamMessage>(data);
+      if (parsed.event === "list_main_questions") {
+        setTeamInfo((prev) => ({ ...prev, main_question: parsed.data }));
+        setPhase("main_questions");
+      }
+    };
+
+    socket.addEventListener("message", onMessage);
+    return () => socket.removeEventListener("message", onMessage);
+  }, [socket]);
 
   return (
     <Context.Provider value={{ setTeamInfo, teamInfo }}>

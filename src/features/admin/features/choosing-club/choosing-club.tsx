@@ -9,9 +9,27 @@ import {
 } from "@/core/components/ui/phase-card";
 import { AdminTeamInfo, useTeams } from "../../providers/teams-provider";
 import { TeamLogo } from "@/core/components/ui/team-logo";
+import { useAdminSocket } from "../../providers/admin-socket-provider";
+import { useLayoutEffect } from "react";
+import { useAdminPhases } from "../../providers/admin-phases-provider";
 
 export function ChoosingClub() {
   const { team1, team2 } = useTeams();
+  const { socket } = useAdminSocket();
+  const { setPhase } = useAdminPhases();
+
+  useLayoutEffect(() => {
+    if (!socket) return;
+  }, [socket]);
+
+  function handleNext() {
+    socket?.send(
+      JSON.stringify({
+        event: "start_main_questions",
+      })
+    );
+    setPhase("main_questions");
+  }
 
   return (
     <EnterExit>
@@ -29,7 +47,10 @@ export function ChoosingClub() {
             <PhaseCardFooter></PhaseCardFooter>
           </PhaseCard>
 
-          <GameButton className="h-10 text-xl px-24 py-0 font-extrabold">
+          <GameButton
+            className="h-10 text-xl px-24 py-0 font-extrabold"
+            onClick={handleNext}
+          >
             NEXT
           </GameButton>
         </div>
