@@ -1,24 +1,37 @@
 import { cn } from "@/core/lib/utils";
 import { AnimatePresence, motion } from "motion/react";
-import { useState } from "react";
+import { useMemo } from "react";
 import { Check } from "lucide-react";
 import { X } from "lucide-react";
 
 type AnswerProps = {
   answer: {
-    id: string;
+    id: number;
     answer: string;
-    isCorrect: boolean;
+    is_correct: boolean;
   };
-  answered: boolean;
-  onAnswer: (answerId: string) => void;
+  hasTimedOut: boolean;
+  selectedAnswerId: number | null;
+  onAnswer: (answerId: number) => void;
 } & React.ComponentProps<"button">;
 
-export function Answer({ answer, onAnswer, answered, ...props }: AnswerProps) {
-  const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
+export function Answer({
+  answer,
+  onAnswer,
+  selectedAnswerId,
+  hasTimedOut,
+  ...props
+}: AnswerProps) {
+  const isCorrect = useMemo(() => {
+    if (answer.id !== selectedAnswerId) return null;
+
+    return answer.is_correct;
+  }, [answer, selectedAnswerId]);
+
+  const answered = !!selectedAnswerId;
 
   const handleAnswer = () => {
-    setIsCorrect(answer.isCorrect);
+    if (hasTimedOut) return;
     onAnswer(answer.id);
   };
 
@@ -32,7 +45,8 @@ export function Answer({ answer, onAnswer, answered, ...props }: AnswerProps) {
         answered && "border-white/70",
         isCorrect === false && "border-red-500/80",
         isCorrect === true && "border-green-500/80",
-        props.disabled && "pointer-events-none"
+        hasTimedOut && "border-red-500/80",
+        (props.disabled || hasTimedOut) && "pointer-events-none"
       )}
       {...props}
     >

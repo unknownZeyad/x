@@ -12,7 +12,7 @@ function ContentLayout({ children, personSrc }: { children: React.ReactNode, per
         <img
           src='/assets/images/Sobi-Fantasy-Game-Logo.webp'
           alt='logo image'
-          className='absolute w-[200px] object-cover top-4 right-8 z-10 scale-300'
+          className='absolute w-[200px] object-cover top-4 right-8 z-10 scale-300 pointer-events-none'
         />
 
         <div className='w-full h-2/3 gap-12 flex items-center justify-between'>

@@ -20,6 +20,7 @@ type TeamInfo = {
     hold: boolean;
     questions: MainQuestion[];
   } | null;
+  winnerDecided: boolean;
 };
 
 const Context = createContext<{
@@ -52,6 +53,7 @@ export default function TeamInfoProvider({
     used_magic_card: false,
     won_phase1: false,
     main_question: null,
+    winnerDecided: false,
   });
 
   const { team: teamId } = useParams<{ team: string }>();
@@ -60,7 +62,7 @@ export default function TeamInfoProvider({
     if (!socket) return;
 
     const onMessage = ({ data }: MessageEvent) => {
-      const parsed = parse<ServerTeamMessage>(data);
+      const parsed = parse<any>(data);
 
       // Handle the specific 'your_team' event
       if (parsed.event === "your_team") {
@@ -89,6 +91,24 @@ export default function TeamInfoProvider({
       if (parsed.event === "list_main_questions") {
         setTeamInfo((prev) => ({ ...prev, main_question: parsed.data }));
         setPhase("main_questions");
+      }
+
+      if (parsed.event === "unhold_choosing_main_question") {
+        setTeamInfo((prev) => {
+          return {
+            ...prev,
+            main_question: prev.main_question
+              ? { ...prev.main_question, hold: false }
+              : null,
+          };
+        });
+      }
+
+      if (parsed.event === "winner") {
+        setTeamInfo((prev) => ({
+          ...prev,
+          winnerDecided: true,
+        }));
       }
     };
 
