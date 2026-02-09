@@ -15,8 +15,8 @@ function SpeedQuestion() {
   const { socket } = useAdminSocket()
   const [question, setQuestion] = useState<SpeedQuestion | null>(null)
   const [deliveryDate, setDeliveryDate] = useState<number>(0)
-  const [winner, setWinner] = useState<string | null>(null)
   const { setPhase } = useAdminPhases()
+  const [winner, setWinner] = useState<string | null>(null)
 
   useEffect(() => {
     socket?.addEventListener('message', (msg) => {
@@ -35,7 +35,7 @@ function SpeedQuestion() {
 
   function handleNext() {
     socket?.send(JSON.stringify({ event: 'start_choosing_clubs' }))
-    setPhase('choosing_clubs')
+    setPhase('chosen_clubs')
   }
 
   return (

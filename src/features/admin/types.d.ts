@@ -1,44 +1,91 @@
 declare type ServerAdminMessage =
   | {
-      event: "can_start";
-      data: null;
-    }
+    event: "can_start";
+    data: null;
+  }
   | {
-      event: "experience_started";
-      data: null;
+    event: "experience_started";
+    data: null;
+  } |
+  {
+    event: 'unhold_choosing_club',
+    data: {
+      choosen_club_id: number
     }
-  | {
-      event: "view_speed_question";
-      data: {
-        date: number;
-        question: SpeedQuestion;
-      };
+  } |
+  {
+    event: 'magic_card_question',
+    data: {
+      question: string;
+      answers: {
+        answer: string;
+        is_correct: boolean;
+        id: number;
+      }[];
     }
+  } |
+  {
+    event: 'main_question_answer_result',
+    data: {
+      score: number,
+      is_correct: boolean,
+      question_points: number,
+      used_magic_card: boolean,
+      team_name: string,
+      club: Club,
+    }
+  } |
+  {
+    event: 'unhold_choosing_main_question',
+    data: {
+      choosen_questions_ids: number[]
+    }
+  } |
+  {
+    event: 'view_speed_question',
+    data: {
+      date: number,
+      question: SpeedQuestion
+    }
+  } | {
+    event: "speed_question_winner";
+    data: {
+      team: string;
+      team_name: string;
+    };
+  } |
+  {
+    event: "view_speed_question";
+    data: {
+      date: number;
+      question: SpeedQuestion;
+    };
+  }
   | {
-      event: "clubs_chosen";
-      data: {
-        team1: {
-          choosen_club: Club;
-          [key: string]: any;
-        };
-        team2: {
-          choosen_club: Club;
-          [key: string]: any;
-        };
+    event: "clubs_chosen";
+    data: {
+      team1: {
+        choosen_club: Club;
         [key: string]: any;
       };
-    }
-  | {
-      event: "speed_question_winner";
-      data: {
-        team: string;
-        team_name: string;
+      team2: {
+        choosen_club: Club;
+        [key: string]: any;
       };
-    }
-  | {
-      event: "view_all_choosen_clubs";
-      data: {
-        team1_club: Club;
-        team2_club: Club;
-      };
+      [key: string]: any;
     };
+  }
+  | {
+    event: "speed_question_winner";
+    data: {
+      team: string;
+      team_name: string;
+    };
+  }
+  | {
+    event: "view_all_choosen_clubs";
+    data: {
+      team1_club: Club;
+      team2_club: Club;
+    };
+  };

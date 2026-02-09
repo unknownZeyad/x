@@ -32,74 +32,40 @@ const logoMap: Record<string, any> = {
 };
 
 export default function ChooseClubs({ hold, otherTeamClub, clubs }: { hold: boolean, otherTeamClub: number | null, clubs: Club[] | null }) {
-    const { teamInfo } = useTeamInfo();
+    const { teamInfo, setTeamInfo } = useTeamInfo();
+    const [currId, setCurrId] = useState<number | null>(null);
     const { socket } = useTeamSocket();
-    const [localSelection, setLocalSelection] = useState<number | null>(null);
 
-    const selectedClub = localSelection ?? teamInfo.choosen_club?.id ?? null;
-
-    const handleSelectClub = (clubId: number) => {
-        setLocalSelection(clubId);
-    };
-
-    const [isSending, setIsSending] = useState(false);
-
-    const isConfirmed = teamInfo?.choosen_club?.id === selectedClub;
-
-    // Use the clubs from props or fallback to hardcoded if null
     const displayedClubs = clubs ? clubs.map(c => ({
         ...c,
         logo: c.img_url || logoMap[c.name.toUpperCase()] || realMadridLogo
     })) : teams;
 
-    // Reset isSending when teamInfo updates to match our selection or if it's different
+    const didChoose = Boolean(teamInfo?.choosen_club?.id)
+
+
     useEffect(() => {
-        setIsSending(false);
-    }, [teamInfo?.choosen_club?.id]);
+        socket?.addEventListener('message', (event) => {
+            const data = parse<ServerTeamMessage>(event.data);
+            if (data.event === 'unhold_choosing_club') {
+                setTeamInfo(prev => ({
+                    ...prev,
+                    choosen_club: clubs?.find(c => c.id === data.data.choosen_club_id) || null
+                }))
+            }
+        })
+    }, [socket])
 
-    const handleConfirm = (e?: React.MouseEvent) => {
-        if (e) e.preventDefault();
-
-        const socketReady = socket?.readyState === WebSocket.OPEN;
-        console.log('>>> CONFIRM CLICKED', {
-            selectedClub,
-            hasSocket: !!socket,
-            socketReady,
-            isConfirmed,
-            hold,
-            isSending
-        });
-
-        // ONLY block if mandatory things are missing (socket or selection)
-        // We remove 'isConfirmed' and 'hold' from this guard to allow re-sending if it feels stuck.
-        if (!selectedClub || !socket || !socketReady || isSending) {
-            console.warn('>>> CONFIRM BLOCKED - Essential missing:', {
-                noClubSelected: !selectedClub,
-                noSocketObject: !socket,
-                socketNotOpen: !socketReady,
-                currentlySending: isSending
-            });
-            return;
-        }
-
-        try {
-            setIsSending(true);
-            const message = JSON.stringify({
+    const handleConfirm = () => {
+        if (!didChoose) {
+            setTeamInfo(prev => ({
+                ...prev,
+                choosen_club: clubs?.find(c => c.id === currId) || null
+            }))
+            socket?.send(JSON.stringify({
                 event: 'choose_club',
-                data: { club_id: selectedClub }
-            });
-            console.log('>>> SENDING TO SOCKET:', message);
-            socket.send(message);
-            console.log('>>> MESSAGE DISPATCHED');
-
-            // Safety timeout: reset sending state after 2 seconds no matter what
-            setTimeout(() => {
-                setIsSending(false);
-                console.log('>>> SENDING TIMEOUT - State reset');
-            }, 2000);
-        } catch (error) {
-            console.error('>>> SEND ERROR:', error);
-            setIsSending(false);
+                data: { club_id: currId }
+            }))
         }
     };
 
@@ -120,8 +86,8 @@ export default function ChooseClubs({ hold, otherTeamClub, clubs }: { hold: bool
                         </span>
                     </div>
 
-                    <Image
-                        src={logo || ""}
+                    <img
+                        src={logo.src}
                         width={120}
                         height={120}
                         alt='logo image'
@@ -131,10 +97,9 @@ export default function ChooseClubs({ hold, otherTeamClub, clubs }: { hold: bool
                     <div className='w-full flex items-center justify-around gap-4'>
                         <div className='shrink-0'>
                             <div className='relative'>
-                                {/* Card background for person */}
                                 <div className="rounded-2xl shadow-xl">
-                                    <Image
-                                        src={person || ""}
+                                    <img
+                                        src={person.src}
                                         width={180}
                                         height={300}
                                         alt='person image'
@@ -151,15 +116,14 @@ export default function ChooseClubs({ hold, otherTeamClub, clubs }: { hold: bool
                                     {displayedClubs.map((team) => {
                                         const isLocked = otherTeamClub === team.id && teamInfo.choosen_club?.id !== team.id;
                                         return (
-                                            <div
+                                            <button
                                                 key={team.id}
-                                                onClick={() => !isLocked && !isConfirmed && !hold && handleSelectClub(team.id)}
+                                                onClick={() => !isLocked && !hold && setCurrId(team.id)}
                                                 className={cn(
                                                     "relative cursor-pointer transition-all duration-300 transform",
-                                                    selectedClub === team.id && "scale-105",
+                                                    currId === team.id && "scale-105",
                                                     isLocked && "opacity-40 grayscale blur-[1px] pointer-events-none scale-95",
                                                     hold && "opacity-40 grayscale brightness-50 pointer-events-none",
-                                                    !isLocked && !isConfirmed && !hold && "hover:scale-105"
                                                 )}
                                             >
                                                 <div className='rounded-xl  mb-3'>
@@ -172,7 +136,7 @@ export default function ChooseClubs({ hold, otherTeamClub, clubs }: { hold: bool
                                                     />
                                                 </div>
 
-                                                {selectedClub === team.id && (
+                                                {currId === team.id && (
                                                     <div className='absolute -top-6 left-1/2 transform rotate-180 -translate-x-1/2 z-10 animate-bounce'>
                                                         <div className='w-0 h-0 border-l-12 border-l-transparent border-r-12 border-r-transparent border-b-16 border-b-green-500 drop-shadow-xl'></div>
                                                     </div>
@@ -185,7 +149,7 @@ export default function ChooseClubs({ hold, otherTeamClub, clubs }: { hold: bool
                                                         </div>
                                                     </div>
                                                 )}
-                                            </div>
+                                            </button>
                                         );
                                     })}
                                 </div>
@@ -205,31 +169,14 @@ export default function ChooseClubs({ hold, otherTeamClub, clubs }: { hold: bool
                                 <div className='flex justify-center'>
                                     <button
                                         type="button"
-                                        disabled={!selectedClub || isSending || socket?.readyState !== WebSocket.OPEN}
                                         onClick={handleConfirm}
                                         className={cn(
                                             "relative z-50 px-20 py-3 rounded-full text-white font-bold text-lg cursor-pointer border-2 border-amber-400 transition-all duration-300 transform active:scale-95",
-                                            selectedClub
-                                                ? isConfirmed
-                                                    ? "bg-amber-600 border-amber-300 opacity-80 cursor-default"
-                                                    : (hold || isSending)
-                                                        ? "bg-gray-600 border-gray-500 opacity-50 font-normal italic cursor-wait"
-                                                        : socket?.readyState === WebSocket.OPEN
-                                                            ? "bg-linear-to-r from-green-400 to-green-500 hover:from-green-500 hover:to-green-600 shadow-xl hover:shadow-green-500/50"
-                                                            : "bg-gray-600 cursor-not-allowed opacity-50 font-normal italic"
-                                                : "bg-gray-600 cursor-not-allowed opacity-50"
+                                            didChoose ? 'bg-gray-600 cursor-not-allowed opacity-50 font-normal italic' : 'bg-linear-to-r from-green-400 to-green-500 hover:from-green-500 hover:to-green-600 shadow-xl hover:shadow-green-500/50'
                                         )}
                                     >
                                         <span className="relative z-10">
-                                            {isConfirmed
-                                                ? "✓ CONFIRMED"
-                                                : isSending
-                                                    ? "SENDING..."
-                                                    : hold
-                                                        ? "WAITING FOR TURN"
-                                                        : socket?.readyState === WebSocket.OPEN
-                                                            ? "CONFIRM CHOICE"
-                                                            : "CONNECTING..."}
+                                            Confirm
                                         </span>
                                     </button>
                                 </div>

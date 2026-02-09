@@ -3,26 +3,27 @@
 import { useAdminSocket } from "../../providers/admin-socket-provider";
 import { useEffect, useState } from "react";
 import { parse } from "@/core/lib/utils";
-import Image from "next/image";
 import backgroundImg from '@public/assets/images/background_Img.png';
 
-export default function ChosenClubs({ state }: { state: any }) {
-    if (!state) return (
-        <div className="w-full h-screen bg-black flex items-center justify-center">
-            <p className="text-white/50 animate-pulse text-2xl font-bold uppercase italic tracking-widest">
-                Waiting for final results...
-            </p>
-        </div>
-    );
+export default function ChosenClubs() {
 
-    const team1Club = state.team1?.choosen_club;
-    const team2Club = state.team2?.choosen_club;
+    const { socket } = useAdminSocket()
+    const [clubs, setClubs] = useState<{
+        team1: Club | null,
+        team2: Club | null
+    } | null>(null)
 
-    if (!team1Club || !team2Club) return (
-        <div className="w-full h-screen bg-black flex items-center justify-center">
-            <p className="text-white/50 font-bold">Waiting for team choices...</p>
-        </div>
-    );
+    useEffect(() => {
+        socket?.addEventListener('message', (msg) => {
+            const parsed = parse<ServerAdminMessage>(msg.data)
+            if (parsed.event === 'view_all_choosen_clubs') {
+                setClubs({
+                    team1: parsed.data.team1_club,
+                    team2: parsed.data.team2_club
+                })
+            }
+        })
+    }, [socket])
 
     return (
         <div
@@ -34,29 +35,28 @@ export default function ChosenClubs({ state }: { state: any }) {
             </h1>
 
             <div className="flex items-center justify-center gap-24 w-full px-20">
-                {/* Team 1 Club */}
                 <div className="flex flex-col items-center gap-6 group scale-110">
                     <div className="relative">
                         <div className="absolute -inset-4 bg-amber-400/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
                         <div className="relative w-64 h-64 bg-white/10 backdrop-blur-md rounded-3xl border-2 border-amber-400/30 p-8 flex items-center justify-center shadow-2xl overflow-hidden">
-                            {team1Club.img_url ? (
-                                <Image
-                                    src={team1Club.img_url}
-                                    alt={team1Club.name}
+                            {clubs?.team1 ? (
+                                <img
+                                    src={clubs.team1.img_url}
+                                    alt={clubs.team1.name}
                                     width={180}
                                     height={180}
                                     className="object-contain"
                                 />
                             ) : (
                                 <div className="text-white/20 text-8xl font-black uppercase italic -rotate-12 select-none">
-                                    {team1Club.name.charAt(0)}
+                                    A
                                 </div>
                             )}
                         </div>
                     </div>
                     <div className="text-center">
-                        <p className="text-amber-400 text-sm font-bold tracking-widest uppercase mb-1">{state.team1.name}</p>
-                        <h2 className="text-4xl font-black italic uppercase">{team1Club.name}</h2>
+                        <p className="text-amber-400 text-sm font-bold tracking-widest uppercase mb-1">Team (A)</p>
+                        <h2 className="text-4xl font-black italic uppercase">{clubs?.team1?.name || "no Club Choosed"}</h2>
                     </div>
                 </div>
 
@@ -72,24 +72,24 @@ export default function ChosenClubs({ state }: { state: any }) {
                     <div className="relative">
                         <div className="absolute -inset-4 bg-amber-400/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
                         <div className="relative w-64 h-64 bg-white/10 backdrop-blur-md rounded-3xl border-2 border-amber-400/30 p-8 flex items-center justify-center shadow-2xl overflow-hidden">
-                            {team2Club.img_url ? (
-                                <Image
-                                    src={team2Club.img_url}
-                                    alt={team2Club.name}
+                            {clubs?.team2?.img_url ? (
+                                <img
+                                    src={clubs.team2.img_url}
+                                    alt={clubs.team2.name}
                                     width={180}
                                     height={180}
                                     className="object-contain"
                                 />
                             ) : (
                                 <div className="text-white/20 text-8xl font-black uppercase italic -rotate-12 select-none">
-                                    {team2Club.name.charAt(0)}
+                                    B
                                 </div>
                             )}
                         </div>
                     </div>
                     <div className="text-center">
-                        <p className="text-amber-400 text-sm font-bold tracking-widest uppercase mb-1">{state.team2.name}</p>
-                        <h2 className="text-4xl font-black italic uppercase">{team2Club.name}</h2>
+                        <p className="text-amber-400 text-sm font-bold tracking-widest uppercase mb-1">Team (B)</p>
+                        <h2 className="text-4xl font-black italic uppercase">{clubs?.team2?.name || "no Club Choosed"}</h2>
                     </div>
                 </div>
             </div>
