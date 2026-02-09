@@ -23,12 +23,17 @@ export default function Admin() {
 
       const event = parsed.event;
       if (event === "experience_started") setPhase("speed_question")
-      if (event === "clubs_chosen") setPhase('chosen_clubs');
+      if (event === "choosing_clubs") setPhase('choosing_clubs');
     }
 
     socket.addEventListener("message", onMessage);
     return () => socket.removeEventListener("message", onMessage);
+
   }, [socket, setPhase]);
+
+  useEffect(() => {
+    console.log("phase", phase)
+  }, [phase]);
 
   return (
     <div className="w-full h-screen bg-black">
@@ -38,10 +43,10 @@ export default function Admin() {
         )}
         {/* {phase === "intro" && <Welcome key="welcome" />} */}
         {phase === "speed_question" && <SpeedQuestion key="speed_question" />}
-        {phase === "chosen_clubs" && (
-          <ChosenClubs key="chosen_clubs" />
+        {phase === "choosing_clubs" && (
+          <ChoosingClub key="choosing_clubs" />
         )}
-        {phase === "choosing_clubs" && <ChoosingClub />}
+        {/* {phase === "choosing_clubs" && <ChoosingClub />} */}
         {phase === "main_questions" && <AdminMainQuestions />}
       </AnimatePresence>
     </div>
