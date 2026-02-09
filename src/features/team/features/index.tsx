@@ -15,6 +15,7 @@ import SpeedCard from "@/core/components/derived/speed-card";
 export default function Team() {
     const [question, setQuestion] = useState<SpeedQuestion | null>(null)
     const [deliveryDate, setDeliveryDate] = useState<number>(0)
+    const [winner, setWinner] = useState<string | null>(null)
     const { phase, setPhase } = useTeamPhases();
     const { socket } = useTeamSocket();
 
@@ -27,6 +28,9 @@ export default function Team() {
                 setPhase('speed_question')
                 setQuestion(parsed.data.question)
                 setDeliveryDate(parsed.data.date)
+            }
+            if (parsed.event === 'speed_question_winner') {
+                setWinner(parsed.data.team_name)
             }
         })
     }, [socket])
@@ -42,7 +46,8 @@ export default function Team() {
                             deliveryDate={deliveryDate}
                             answers={question!.answers}
                             question={question!.question}
-                            interactive={false}
+                            interactive={true}
+                            winner={winner}
                         />
                     </EnterExit>
                 )}

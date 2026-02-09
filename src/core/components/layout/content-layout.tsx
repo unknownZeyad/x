@@ -2,7 +2,7 @@ import React from 'react'
 import EnterExit from '../derived/enter-exit'
 import backgroundImg from '@public/assets/images/background_Img.png'
 
-function ContentLayout({ children }: { children: React.ReactNode }) {
+function ContentLayout({ children, personSrc }: { children: React.ReactNode, personSrc?: string }) {
   return (
     <EnterExit>
       <div
@@ -17,13 +17,15 @@ function ContentLayout({ children }: { children: React.ReactNode }) {
 
         <div className='w-full h-2/3 gap-12 flex items-center justify-between'>
           <div className='w-1/4'>
-            <img
-              src={""}
-              width={400}
-              height={600}
-              alt='person image'
-              className='object-contain'
-            />
+            {personSrc && (
+              <img
+                src={personSrc}
+                width={400}
+                height={600}
+                alt='person image'
+                className='object-contain'
+              />
+            )}
           </div>
 
           <div className="h-full flex items-center justify-center w-3/4">
