@@ -129,7 +129,7 @@ export function AdminMainQuestions() {
                       </div>
                     </div>
                     <Image
-                      src={isCorrect ? "/assets/images/Goal.png" : "/assets/images/missGoal.png"}
+                      src={isCorrect ? "/assets/images/Goal.webp" : "/assets/images/missGoal.webp"}
                       alt={isCorrect ? "Goal" : "Miss"}
                       width={250}
                       height={350}
