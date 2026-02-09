@@ -7,8 +7,12 @@ import {
   PhaseCardFooter,
   PhaseCardHeader,
 } from "@/core/components/ui/phase-card";
+import { AdminTeamInfo, useTeams } from "../../providers/teams-provider";
+import { TeamLogo } from "@/core/components/ui/team-logo";
 
 export function ChoosingClub() {
+  const { team1, team2 } = useTeams();
+
   return (
     <EnterExit>
       <ContentLayout>
@@ -18,23 +22,9 @@ export function ChoosingClub() {
               <h1 className="text-4xl font-bold">CHOOSING CLUBS</h1>
             </PhaseCardHeader>
             <PhaseCardContent className="flex gap-6 items-center justify-evenly">
-              <div className="flex flex-col w-1/6">
-                <div className="text-2xl font-bold">Logo Here</div>
-                <img
-                  className="rounded-4xl"
-                  src="/assets/images/real-madrid-logo.png"
-                  alt="Club 1"
-                />
-              </div>
+              <TeamCard team={team1} />
               <div className="h-2/5 rounded-full w-1 bg-yellow-500"></div>
-              <div className="flex flex-col w-1/6">
-                <div className="text-2xl font-bold">Logo Here</div>
-                <img
-                  src="/assets/images/barcelona-logo.png"
-                  alt="Club 2"
-                  className="rounded-4xl"
-                />
-              </div>
+              <TeamCard team={team2} />
             </PhaseCardContent>
             <PhaseCardFooter></PhaseCardFooter>
           </PhaseCard>
@@ -45,5 +35,16 @@ export function ChoosingClub() {
         </div>
       </ContentLayout>
     </EnterExit>
+  );
+}
+
+function TeamCard({ team }: { team: AdminTeamInfo }) {
+  if (!team.club) return <div>Choosing a club...</div>;
+
+  return (
+    <div className="flex flex-col w-1/6 space-y-4 items-center">
+      <TeamLogo name={team.club.name} src={team.club.img_url} />
+      <img className="rounded-4xl" src={team.club.img_url} alt="" />
+    </div>
   );
 }

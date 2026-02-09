@@ -15,10 +15,12 @@ export function TeamLogo({ src, className, name, ...props }: TeamLogoProps) {
       />
       <div className="text-2xl font-bold flex flex-col items-center">
         <div className="italic font-light text-sm">TEAM</div>
-        <div className="font-bold uppercase italic">{name}</div>
+        <div className="font-bold uppercase italic whitespace-nowrap">
+          {name}
+        </div>
         <div className="text-[10px] font-light">SOBI FANTASY GAME</div>
       </div>
-      <img className="size-14 object-contain" src={src} alt={name} />
+      <img className="size-14 object-contain shrink-0" src={src} alt="" />
     </div>
   );
 }
