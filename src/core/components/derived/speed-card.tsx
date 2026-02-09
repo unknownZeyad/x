@@ -33,6 +33,7 @@ export default function SpeedCard({ answers, interactive = true, question, onAns
     deliveryDate: number,
     winner?: string | null
 }) {
+
     const [answered, setAnswered] = useState<boolean>(false)
 
     function handleAnswer(ansId: number) {

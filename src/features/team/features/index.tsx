@@ -8,9 +8,9 @@ import Wating from "./wating/wating";
 import Welcomes from "./welcomes/welcomes";
 import ChooseClubs from "./choose-clubs/page";
 import { parse } from "@/core/lib/utils";
-import SpeedQuestion from "@/features/admin/features/speed-question/speed-question";
 import EnterExit from "@/core/components/derived/enter-exit";
 import SpeedCard from "@/core/components/derived/speed-card";
+import SpeedQuestion from "./speed-question/speed-question";
 
 export default function Team() {
     const [question, setQuestion] = useState<SpeedQuestion | null>(null)
@@ -40,17 +40,7 @@ export default function Team() {
             <AnimatePresence mode="wait">
                 {phase === "wating" && <Wating key="wating" />}
                 {phase === "welcome" && <Welcomes key="welcomes" />}
-                {(phase === "speed_question" && question) && (
-                    <EnterExit key='speed_question'>
-                        <SpeedCard
-                            deliveryDate={deliveryDate}
-                            answers={question!.answers}
-                            question={question!.question}
-                            interactive={true}
-                            winner={winner}
-                        />
-                    </EnterExit>
-                )}
+                {(phase === "speed_question" && question) && <SpeedQuestion winner={winner} key="speed_question" deliveryDate={deliveryDate} answers={question.answers} question={question.question} interactive={true} />}
                 {phase === "choose_clubs" && <ChooseClubs key="choose-clubs" />}
             </AnimatePresence>
         </div>
