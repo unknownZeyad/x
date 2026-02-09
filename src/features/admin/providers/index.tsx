@@ -3,13 +3,13 @@
 import { ReactNode } from "react";
 import AdminSocketProvider from "./admin-socket-provider";
 import AdminPhasesProvider from "./admin-phases-provider";
-import { TeamsProvider } from "./teams-provider";
+import { AdminDataProvider } from "./admin-data-provider";
 
 function AdminProviders({ children }: { readonly children: ReactNode }) {
   return (
     <AdminSocketProvider>
       <AdminPhasesProvider>
-        <TeamsProvider>{children}</TeamsProvider>
+        <AdminDataProvider>{children}</AdminDataProvider>
       </AdminPhasesProvider>
     </AdminSocketProvider>
   );

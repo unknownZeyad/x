@@ -1,27 +1,23 @@
-import EnterExit from "@/core/components/derived/enter-exit";
+import { motion } from "motion/react";
+import Image from "next/image";
 import {
+  PhaseCard,
   PhaseCardContent,
   PhaseCardFooter,
   PhaseCardHeader,
 } from "@/core/components/ui/phase-card";
 import ContentLayout from "@/core/components/layout/content-layout";
-import { PhaseCard } from "@/core/components/ui/phase-card";
-import { Answer } from "@/core/components/ui/answer";
-import CountdownTimer from "@/core/components/ui/counter";
+import EnterExit from "@/core/components/derived/enter-exit";
 import { TeamLogo } from "@/core/components/ui/team-logo";
-import { useAdminData } from "../../providers/admin-data-provider";
-import { AnswerResultScreen } from "./answer-result-screen";
 
-export function AdminMainQuestions() {
-  const { currentQuestion, answerResult } = useAdminData();
-
-  if (!currentQuestion) return null;
-
-  if (answerResult) {
-    return <AnswerResultScreen answerResult={answerResult} />;
-  }
-
-  const score = currentQuestion.score;
+export function AnswerResultScreen({
+  answerResult,
+}: {
+  answerResult: MainQuestionAnswerResult;
+}) {
+  const isCorrect = answerResult.is_correct;
+  const scoreChange = answerResult.question_points;
+  const score = answerResult.score;
 
   return (
     <EnterExit>
@@ -43,40 +39,43 @@ export function AdminMainQuestions() {
                 className: "bg-transparent",
               }}
             >
-              <div className="py-8 space-y-10 bg-black/50 px-16">
-                <div className="flex justify-between gap-6">
-                  <div className="size-28 shrink-0">
-                    <img
-                      className="w-full h-full object-contain"
-                      src="/assets/images/icons/golden-trophy.webp"
-                      alt=""
-                    />
-                  </div>
-                  <h1 className="text-5xl font-bold text-center uppercase">
-                    {currentQuestion.question.question}
-                  </h1>
-                  <div className="size-24 shrink-0">
-                    <CountdownTimer />
+              <motion.div
+                key="result"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0 }}
+                className=" bg-black/50 px-16 flex items-center justify-center gap-16"
+              >
+                <h1 className={`text-8xl font-black italic text-white`}>
+                  {isCorrect ? "GOAL!" : "MISS!"}
+                </h1>
+                <div className="flex flex-col items-center">
+                  <div className="text-3xl font-bold text-white">SCORE</div>
+                  <div
+                    className={`text-7xl px-5 font-bold italic bg-linear-to-r from-yellow-500 via-yellow-100 to-yellow-300 text-transparent bg-clip-text`}
+                  >
+                    {isCorrect ? "+" : ""}
+                    {scoreChange}
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-8 gap-x-20 w-6/8 mx-auto">
-                  {currentQuestion.question.answers.map((answer) => (
-                    <Answer
-                      key={answer.id}
-                      answer={answer}
-                      hasTimedOut={false}
-                      selectedAnswerId={null}
-                      onAnswer={() => {}}
-                    />
-                  ))}
-                </div>
-              </div>
+                <Image
+                  src={
+                    isCorrect
+                      ? "/assets/images/Goal.png"
+                      : "/assets/images/missGoal.png"
+                  }
+                  alt={isCorrect ? "Goal" : "Miss"}
+                  width={250}
+                  height={350}
+                  className="object-contain"
+                />
+              </motion.div>
 
               <div className="flex justify-between items-center bg-black/50 px-20 border-l border-yellow-500 py-8 border-r border-t">
                 <div className="flex-1">
                   <TeamLogo
-                    src={currentQuestion.club.img_url}
-                    name={currentQuestion.club.name}
+                    src={answerResult.club.img_url}
+                    name={answerResult.club.name}
                   />
                 </div>
                 <div className="flex flex-col items-center">
@@ -89,7 +88,7 @@ export function AdminMainQuestions() {
                 <div className="flex-1">
                   <img
                     className="rounded-2xl ml-auto w-40 aspect-4/5"
-                    src={currentQuestion.club.img_url}
+                    src="/assets/images/barcelona-logo.png"
                     alt="Footer"
                   />
                 </div>

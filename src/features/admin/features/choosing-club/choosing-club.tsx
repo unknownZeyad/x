@@ -7,7 +7,10 @@ import {
   PhaseCardFooter,
   PhaseCardHeader,
 } from "@/core/components/ui/phase-card";
-import { AdminTeamInfo, useTeams } from "../../providers/teams-provider";
+import {
+  AdminTeamInfo,
+  useAdminData,
+} from "../../providers/admin-data-provider";
 import { TeamLogo } from "@/core/components/ui/team-logo";
 import { useAdminSocket } from "../../providers/admin-socket-provider";
 import { useLayoutEffect } from "react";
@@ -15,7 +18,7 @@ import { useAdminPhases } from "../../providers/admin-phases-provider";
 import { useAudio } from "@/core/providers/audio-provider";
 
 export function ChoosingClub() {
-  const { team1, team2 } = useTeams();
+  const { team1, team2 } = useAdminData();
   const { socket } = useAdminSocket();
   const { setPhase } = useAdminPhases();
   const { playAudio, stopAudio } = useAudio()
