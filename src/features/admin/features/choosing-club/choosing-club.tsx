@@ -163,7 +163,7 @@ function TeamCard({ team, index, confirmedClub }: { team: AdminTeamInfo; index: 
       </motion.div>
       <motion.img
         className="rounded-4xl shadow-xl"
-        src={clubToShow.logo_img_url}
+        src={clubToShow.card_img_url}
         alt=""
         initial={{ opacity: 0, scale: 0.6 }}
         animate={{ opacity: 1, scale: 1 }}

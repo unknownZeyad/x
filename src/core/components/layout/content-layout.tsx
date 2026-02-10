@@ -35,7 +35,7 @@ function ContentLayout({ children, personSrc, backgroundVideoSrc }: { children: 
           }}
         />
 
-        <div className='w-full h-2/3 gap-12 flex items-center justify-between md:w-[85%] mx-auto relative z-10'>
+        <div className='w-full h-2/3 min-h-[500px] gap-12 flex items-center justify-between md:w-[85%] mx-auto relative z-10'>
           <div className='w-1/4'>
             {personSrc && (
               <motion.img

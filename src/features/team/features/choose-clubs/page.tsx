@@ -52,16 +52,15 @@ export default function ChooseClubs({ hold, otherTeamClub, clubs }: { hold: bool
 
 
     const handleConfirm = () => {
-        if (!didChoose) {
-            setTeamInfo(prev => ({
-                ...prev,
-                choosen_club: clubs?.find(c => c.id === currId) || null
-            }))
-            socket?.send(JSON.stringify({
-                event: 'choose_club',
-                data: { club_id: currId }
-            }))
-        }
+        console.log(currId)
+        setTeamInfo(prev => ({
+            ...prev,
+            choosen_club: clubs?.find(c => c.id === currId) || null
+        }))
+        socket?.send(JSON.stringify({
+            event: 'choose_club',
+            data: { club_id: currId }
+        }))
     };
 
     return (
@@ -85,6 +84,7 @@ export default function ChooseClubs({ hold, otherTeamClub, clubs }: { hold: bool
 
                                     return (
                                         <motion.button
+                                            disabled={didChoose}
                                             key={team.id}
                                             onClick={() => !isDisabled && setCurrId(team.id)}
                                             className={cn(
@@ -224,7 +224,7 @@ export default function ChooseClubs({ hold, otherTeamClub, clubs }: { hold: bool
 
                             {/* Confirm Button */}
                             <AnimatePresence>
-                                {!hold && (
+                                {(!hold && !didChoose) && (
                                     <motion.div
                                         className='flex justify-center'
                                         initial={{ opacity: 0, y: 30 }}
@@ -234,7 +234,7 @@ export default function ChooseClubs({ hold, otherTeamClub, clubs }: { hold: bool
                                         <motion.button
                                             type="button"
                                             onClick={handleConfirm}
-                                            disabled={!canConfirm || hold}
+                                            disabled={!canConfirm || hold || didChoose}
                                             className={cn(
                                                 "relative z-10 px-20 py-3 rounded-full text-white font-bold text-lg cursor-pointer border-2 border-amber-400",
                                                 (!canConfirm ? 'bg-gray-600 cursor-not-allowed opacity-50 font-normal italic' : 'bg-linear-to-r from-green-400 to-green-500 shadow-xl')
