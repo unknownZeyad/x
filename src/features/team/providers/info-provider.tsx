@@ -21,6 +21,7 @@ type TeamInfo = {
     questions: MainQuestion[];
   } | null;
   winnerDecided: boolean;
+  unavailable_questions: number[];
 };
 
 const Context = createContext<{
@@ -54,6 +55,7 @@ export default function TeamInfoProvider({
     won_phase1: false,
     main_question: null,
     winnerDecided: false,
+    unavailable_questions: [],
   });
 
   const { team: teamId } = useParams<{ team: string }>();
@@ -101,6 +103,7 @@ export default function TeamInfoProvider({
             main_question: prev.main_question
               ? { ...prev.main_question, hold: false }
               : null,
+            unavailable_questions: parsed.data.choosen_questions_ids,
           };
         });
       }

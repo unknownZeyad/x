@@ -21,12 +21,13 @@ type Question = MainQuestion & {
   selectedAnswerId: number | null;
   hasTimedOut: boolean;
   chosen: boolean;
+  available: boolean;
   isMagicCardQuestion: boolean;
 };
 
 export function TeamMainQuestions() {
   const { teamInfo, setTeamInfo } = useTeamInfo();
-  const { main_question } = teamInfo;
+  const { main_question, unavailable_questions } = teamInfo;
   const { socket } = useTeamSocket();
   const [magicCardUsed, setMagicCardUsed] = useState(false);
 
@@ -37,6 +38,7 @@ export function TeamMainQuestions() {
         selectedAnswerId: null as number | null,
         hasTimedOut: false,
         chosen: false,
+        available: !unavailable_questions.includes(question.id),
         isMagicCardQuestion: false,
       })) ?? []
     );
@@ -167,7 +169,6 @@ export function TeamMainQuestions() {
   useEffect(() => {
     function onMessage(event: MessageEvent) {
       const data = parse<ServerTeamMessage>(event.data);
-      console.log("RECEIVED MESSAGE", data);
       if (data.event === "magic_card_question") {
         setQuestions((prev) => {
           return prev.map((question) => {
@@ -190,6 +191,18 @@ export function TeamMainQuestions() {
       socket?.removeEventListener("message", onMessage);
     };
   }, [socket, currentQuestion?.id]);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setQuestions((prev) => {
+      return prev.map((question) => {
+        return {
+          ...question,
+          available: !unavailable_questions.includes(question.id),
+        };
+      });
+    });
+  }, [unavailable_questions]);
 
   const canSelectNewQuestion = useMemo(() => {
     if (!main_question) return false;
@@ -395,7 +408,9 @@ function QuestionsCarousel({
         <div className="flex items-center">
           {questions.map((question) => {
             const isDisabled =
-              question.selectedAnswerId || question.hasTimedOut;
+              question.selectedAnswerId ||
+              question.hasTimedOut ||
+              !question.available;
             const isSelected = question.id === currentQuestionId;
 
             return (
@@ -407,7 +422,7 @@ function QuestionsCarousel({
                     canSelectNewQuestion &&
                       !isDisabled &&
                       "hover:cursor-pointer hover:scale-105 transition-all duration-300",
-                    isDisabled && "grayscale",
+                    isDisabled && "grayscale pointer-events-none",
                     isSelected &&
                       !isDisabled &&
                       "border-4 border-yellow-500 shadow-lg shadow-yellow-500/70"

@@ -69,7 +69,6 @@ export function AdminDataProvider({ children }: { children: React.ReactNode }) {
       }
 
       if (parsed.event === "main_question_answer_result") {
-        console.log("answer result", parsed.data);
         setAnswerResult(parsed.data);
       }
 
