@@ -21,7 +21,7 @@ export function AnswerResultScreen({
 
   return (
     <EnterExit>
-      <ContentLayout>
+      <ContentLayout personSrc="/assets/images/person.png">
         <div className="flex flex-col items-end gap-4">
           <PhaseCard>
             <PhaseCardHeader

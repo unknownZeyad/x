@@ -24,6 +24,7 @@ export default function Admin() {
       const event = parsed.event;
       if (event === "experience_started") setPhase("speed_question")
       if (event === "choosing_clubs") setPhase('choosing_clubs');
+      if (event === "start_main_questions") setPhase('main_questions');
     }
 
     socket.addEventListener("message", onMessage);

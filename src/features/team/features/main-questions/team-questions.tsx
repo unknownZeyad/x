@@ -212,7 +212,7 @@ export function TeamMainQuestions() {
   return (
     <EnterExit>
       {main_question?.hold && <HoldDialog />}
-      <ContentLayout>
+      <ContentLayout personSrc="/assets/images/person.png">
         <div className="flex flex-col items-end gap-4">
           <PhaseCard>
             <PhaseCardHeader className="flex items-center justify-between">
