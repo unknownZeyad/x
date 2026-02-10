@@ -66,15 +66,15 @@ export default function TeamInfoProvider({
 
       // Handle the specific 'your_team' event
       if (parsed.event === "your_team") {
-        setTeamInfo(parsed.data);
+        setTeamInfo((prev) => ({ ...prev, ...parsed.data }));
       }
 
       // Handle full state updates
       if (parsed.team1 && parsed.team2) {
         if (teamId === "team1") {
-          setTeamInfo(parsed.team1);
+          setTeamInfo((prev) => ({ ...prev, ...parsed.team1 }));
         } else if (teamId === "team2") {
-          setTeamInfo(parsed.team2);
+          setTeamInfo((prev) => ({ ...prev, ...parsed.team2 }));
         }
       }
     };
@@ -95,6 +95,7 @@ export default function TeamInfoProvider({
 
       if (parsed.event === "unhold_choosing_main_question") {
         setTeamInfo((prev) => {
+          if (prev.winnerDecided) return prev;
           return {
             ...prev,
             main_question: prev.main_question
@@ -108,6 +109,9 @@ export default function TeamInfoProvider({
         setTeamInfo((prev) => ({
           ...prev,
           winnerDecided: true,
+          main_question: prev.main_question
+            ? { ...prev.main_question, hold: true }
+            : null,
         }));
       }
     };

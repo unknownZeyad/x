@@ -43,7 +43,6 @@ export function TeamMainQuestions() {
       questions.find((question) => question.id === currentQuestionId) ?? null
     );
   }, [questions, currentQuestionId]);
-  console.log(currentQuestionId, currentQuestion);
 
   function holdMainQuestion() {
     setTeamInfo((prev) => {
@@ -377,8 +376,6 @@ function QuestionsCarousel({
     onQuestionChange(nextQuestion.id);
   }
 
-  if (!main_question) return null;
-
   return (
     <div className="bg-black/50 flex-1 flex items-center justify-between px-10 gap-10">
       <img
@@ -392,7 +389,7 @@ function QuestionsCarousel({
       />
       <div ref={emblaRef} className="flex-1 overflow-hidden">
         <div className="flex items-center">
-          {main_question.questions.map((question) => (
+          {main_question?.questions.map((question) => (
             <div className="flex-1/4 shrink-0" key={question.id}>
               <img
                 key={question.id}
