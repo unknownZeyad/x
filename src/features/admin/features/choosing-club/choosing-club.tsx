@@ -159,7 +159,7 @@ function TeamCard({ team, index, confirmedClub }: { team: AdminTeamInfo; index: 
         animate={{ rotate: 0 }}
         transition={{ type: 'spring', stiffness: 150, delay: 0.8 + index * 0.2 }}
       >
-        <TeamLogo name={clubToShow.name} src={clubToShow.name_img_url} />
+        <TeamLogo name={clubToShow.name} src={clubToShow.logo_img_url} />
       </motion.div>
       <motion.img
         className="rounded-4xl shadow-xl"
