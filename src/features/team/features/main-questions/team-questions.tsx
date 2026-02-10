@@ -17,13 +17,20 @@ import { useTeamSocket } from "../../providers/socket-provider";
 import { HoldDialog } from "./hold-dialog";
 import { parse } from "@/core/lib/utils";
 
+type Question = MainQuestion & {
+  selectedAnswerId: number | null;
+  hasTimedOut: boolean;
+  chosen: boolean;
+  isMagicCardQuestion: boolean;
+};
+
 export function TeamMainQuestions() {
   const { teamInfo, setTeamInfo } = useTeamInfo();
   const { main_question } = teamInfo;
   const { socket } = useTeamSocket();
   const [magicCardUsed, setMagicCardUsed] = useState(false);
 
-  const [questions, setQuestions] = useState(() => {
+  const [questions, setQuestions] = useState<Question[]>(() => {
     return (
       main_question?.questions.map((question) => ({
         ...question,
@@ -35,7 +42,7 @@ export function TeamMainQuestions() {
     );
   });
   const [currentQuestionId, setCurrentQuestionId] = useState<number | null>(
-    questions.at(0)?.id ?? null
+    null
   );
 
   const currentQuestion = useMemo(() => {
@@ -184,22 +191,14 @@ export function TeamMainQuestions() {
     };
   }, [socket, currentQuestion?.id]);
 
-  useEffect(() => {
-    if (!main_question || !currentQuestion) return;
-
-    if (main_question.hold || currentQuestion.chosen) return;
-
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    handleQuestionChange(currentQuestion.id);
-  }, [currentQuestion, main_question, handleQuestionChange]);
-
-  const canScroll = useMemo(() => {
-    if (!main_question || !currentQuestion) return false;
+  const canSelectNewQuestion = useMemo(() => {
+    if (!main_question) return false;
 
     if (main_question.hold) return false;
     if (teamInfo.winnerDecided) return false;
-    if (currentQuestion.hasTimedOut) return true;
-    if (currentQuestion.selectedAnswerId !== null) return true;
+    if (!currentQuestion) return true;
+    if (currentQuestion?.hasTimedOut) return true;
+    if (currentQuestion?.selectedAnswerId) return true;
 
     return false;
   }, [currentQuestion, main_question, teamInfo.winnerDecided]);
@@ -215,7 +214,12 @@ export function TeamMainQuestions() {
       <ContentLayout personSrc="/assets/images/person.png">
         <div className="flex flex-col items-end gap-4">
           <PhaseCard>
-            <PhaseCardHeader className="flex p-2 items-center justify-between">
+            <PhaseCardHeader
+              className="flex p-2 items-center justify-between relative"
+              imageProps={{
+                className: "absolute inset-0 object-cover size-full",
+              }}
+            >
               <TeamLogo
                 src={teamInfo.choosen_club?.logo_img_url ?? ""}
                 name={teamInfo.choosen_club?.name ?? ""}
@@ -225,7 +229,7 @@ export function TeamMainQuestions() {
                 <Score score={teamInfo.score} className="text-shadow-sm" />
                 <span className="text-sm font-bold">POINTS</span>
               </div>
-              <div className="flex-1"></div>
+              <div className="flex-1 max-2xl:hidden"></div>
             </PhaseCardHeader>
             <PhaseCardContent
               className="space-y-3 relative"
@@ -239,11 +243,11 @@ export function TeamMainQuestions() {
               <div className="mt-3 flex gap-3">
                 <img
                   className={cn(
-                    "w-48 object-contain aspect-square border-2 border-amber-500 overflow-hidden shadow-2xl shadow-amber-500/30 hover:cursor-pointer hover:scale-105 transition-all duration-300",
+                    "w-48 object-cover aspect-square border-2 border-amber-500 overflow-hidden shadow-2xl shadow-amber-500/30 hover:cursor-pointer hover:scale-105 transition-all duration-300",
                     magicCardUsed
                       ? "opacity-50 pointer-events-none"
                       : "opacity-100",
-                    canScroll && "pointer-events-none opacity-50"
+                    canSelectNewQuestion && "pointer-events-none opacity-50"
                   )}
                   src="/assets/images/magic-card.webp"
                   alt=""
@@ -251,47 +255,62 @@ export function TeamMainQuestions() {
                 />
                 <QuestionsCarousel
                   onQuestionChange={handleQuestionChange}
-                  canScroll={canScroll}
+                  canSelectNewQuestion={canSelectNewQuestion}
+                  questions={questions}
+                  currentQuestionId={currentQuestionId}
                 />
               </div>
 
-              <div className="space-y-10 bg-black/50 border-l px-16 border-yellow-500 py-8 border-r border-t">
-                <div className="flex justify-between gap-6">
-                  <div className="size-28 shrink-0">
-                    <img
-                      className="w-full h-full object-contain"
-                      src="/assets/images/icons/golden-trophy.webp"
-                      alt=""
-                    />
+              <div className="bg-black/50 border-l px-16 border-yellow-500 py-8 border-r border-t">
+                {currentQuestion ? (
+                  <div className="space-y-10">
+                    <div className="flex justify-between gap-6">
+                      <div className="size-28 shrink-0">
+                        <img
+                          className="w-full h-full object-contain"
+                          src="/assets/images/icons/golden-trophy.webp"
+                          alt=""
+                        />
+                      </div>
+                      <h1 className="text-3xl font-bold text-center uppercase">
+                        {currentQuestion?.question}
+                      </h1>
+                      <div className="size-24 shrink-0">
+                        <CountdownTimer
+                          key={currentQuestion?.id}
+                          initialSeconds={timedOut ? 0 : 60}
+                          paused={
+                            answered ||
+                            timedOut ||
+                            !chosen ||
+                            main_question?.hold
+                          }
+                          onComplete={handleTimedOut}
+                        />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-8 gap-x-20 w-9/10 max-w-3xl mx-auto">
+                      {answers.map((answer) => (
+                        <Answer
+                          key={`current-question-${currentQuestion?.id}-answer-${answer.id}`}
+                          answer={answer}
+                          hasTimedOut={currentQuestion?.hasTimedOut ?? false}
+                          selectedAnswerId={
+                            currentQuestion?.selectedAnswerId ?? null
+                          }
+                          disabled={!!currentQuestion?.selectedAnswerId}
+                          onAnswer={handleAnswer}
+                        />
+                      ))}
+                    </div>
                   </div>
-                  <h1 className="text-3xl font-bold text-center uppercase">
-                    {currentQuestion?.question}
-                  </h1>
-                  <div className="size-24 shrink-0">
-                    <CountdownTimer
-                      key={currentQuestion?.id}
-                      initialSeconds={timedOut ? 0 : 60}
-                      paused={
-                        answered || timedOut || !chosen || main_question?.hold
-                      }
-                      onComplete={handleTimedOut}
-                    />
+                ) : (
+                  <div className="flex flex-col items-center justify-center h-40">
+                    <h1 className="text-3xl font-bold text-center uppercase">
+                      No question selected
+                    </h1>
                   </div>
-                </div>
-                <div className="grid grid-cols-2 gap-8 gap-x-20 w-6/8 mx-auto">
-                  {answers.map((answer) => (
-                    <Answer
-                      key={`current-question-${currentQuestion?.id}-answer-${answer.id}`}
-                      answer={answer}
-                      hasTimedOut={currentQuestion?.hasTimedOut ?? false}
-                      selectedAnswerId={
-                        currentQuestion?.selectedAnswerId ?? null
-                      }
-                      disabled={!!currentQuestion?.selectedAnswerId}
-                      onAnswer={handleAnswer}
-                    />
-                  ))}
-                </div>
+                )}
               </div>
             </PhaseCardContent>
             <PhaseCardFooter />
@@ -304,19 +323,17 @@ export function TeamMainQuestions() {
 
 type QuestionsCarouselProps = {
   onQuestionChange: (questionId: number) => void;
-  canScroll: boolean;
+  canSelectNewQuestion: boolean;
+  questions: Question[];
+  currentQuestionId: number | null;
 };
 
 function QuestionsCarousel({
   onQuestionChange,
-  canScroll,
+  canSelectNewQuestion,
+  questions,
+  currentQuestionId,
 }: QuestionsCarouselProps) {
-  const { teamInfo } = useTeamInfo();
-  const { main_question } = teamInfo;
-  const [currentQuestion, setCurrentQuestion] = useState<MainQuestion | null>(
-    main_question?.questions[0] || null
-  );
-
   const [carouselCanScroll, setCarouselCanScroll] = useState<{
     prev: boolean;
     next: boolean;
@@ -330,6 +347,17 @@ function QuestionsCarousel({
     watchDrag: false,
   });
 
+  function handleQuestionChange(questionId: number) {
+    if (!canSelectNewQuestion) return;
+
+    const newQuestion = questions.find(
+      (question) => question.id === questionId
+    );
+    if (!newQuestion) throw new Error("New question not found");
+
+    onQuestionChange(newQuestion.id);
+  }
+
   function handleScroll() {
     if (!emblaApi) return;
 
@@ -340,71 +368,63 @@ function QuestionsCarousel({
   }
 
   function handlePrevious() {
-    if (!emblaApi?.canScrollNext() || !canScroll) return;
+    if (!emblaApi?.canScrollPrev()) return;
 
     emblaApi.scrollPrev();
     handleScroll();
-
-    const currentIndex = main_question?.questions.findIndex(
-      (question) => question.id === currentQuestion?.id
-    );
-    if (currentIndex === undefined)
-      throw new Error("Current question not found");
-
-    const previousQuestion = main_question?.questions[currentIndex - 1];
-    if (!previousQuestion) throw new Error("Previous question not found");
-
-    setCurrentQuestion(previousQuestion);
-    onQuestionChange(previousQuestion.id);
   }
 
   function handleNext() {
-    if (!emblaApi?.canScrollNext() || !canScroll) return;
+    if (!emblaApi?.canScrollNext()) return;
     emblaApi.scrollNext();
     handleScroll();
-
-    const currentIndex = main_question?.questions.findIndex(
-      (question) => question.id === currentQuestion?.id
-    );
-    if (currentIndex === undefined)
-      throw new Error("Current question not found");
-
-    const nextQuestion = main_question?.questions[currentIndex + 1];
-    if (!nextQuestion) throw new Error("Next question not found");
-
-    setCurrentQuestion(nextQuestion);
-    onQuestionChange(nextQuestion.id);
   }
 
   return (
-    <div className="bg-black/50 flex-1 flex items-center justify-between px-10 gap-10">
+    <div className="bg-black/50 flex-1 flex items-center justify-between">
       <img
         src="/assets/images/icons/chevron.webp"
         className={cn(
-          "size-20 object-contain hover:cursor-pointer hover:scale-110 transition-all duration-300",
+          "size-14 2xl:size-20 object-contain hover:cursor-pointer hover:scale-110 transition-all duration-300",
           carouselCanScroll.prev ? "opacity-100" : "opacity-50"
         )}
         alt=""
         onClick={handlePrevious}
       />
-      <div ref={emblaRef} className="flex-1 overflow-hidden">
+      <div ref={emblaRef} className="flex-1 overflow-hidden py-3">
         <div className="flex items-center">
-          {main_question?.questions.map((question) => (
-            <div className="flex-1/4 shrink-0" key={question.id}>
-              <img
-                key={question.id}
-                className="w-40 object-contain overflow-hidden aspect-square"
-                src={question.img_url}
-                alt=""
-              />
-            </div>
-          ))}
+          {questions.map((question) => {
+            const isDisabled =
+              question.selectedAnswerId || question.hasTimedOut;
+            const isSelected = question.id === currentQuestionId;
+
+            return (
+              <div className="flex-1/4 shrink-0 px-2" key={question.id}>
+                <img
+                  key={question.id}
+                  className={cn(
+                    "w-40 object-contain rounded-3xl overflow-hidden",
+                    canSelectNewQuestion &&
+                      !isDisabled &&
+                      "hover:cursor-pointer hover:scale-105 transition-all duration-300",
+                    isDisabled && "grayscale",
+                    isSelected &&
+                      !isDisabled &&
+                      "border-4 border-yellow-500 shadow-lg shadow-yellow-500/70"
+                  )}
+                  src={question.img_url}
+                  alt=""
+                  onClick={() => handleQuestionChange(question.id)}
+                />
+              </div>
+            );
+          })}
         </div>
       </div>
       <img
         src="/assets/images/icons/chevron.webp"
         className={cn(
-          "size-20 object-contain rotate-180 hover:cursor-pointer hover:scale-110 transition-all duration-300",
+          "size-14 2xl:size-20 object-contain rotate-180 hover:cursor-pointer hover:scale-110 transition-all duration-300",
           carouselCanScroll.next ? "opacity-100" : "opacity-50"
         )}
         alt=""
@@ -422,7 +442,7 @@ function Score({ score, className, ...props }: ScoreProps) {
   return (
     <div
       className={cn(
-        "text-5xl px-5 font-bold italic bg-linear-to-r from-yellow-500 via-yellow-100 to-yellow-300 text-transparent bg-clip-text",
+        "text-5xl px-2 font-bold italic bg-linear-to-r from-yellow-500 via-yellow-100 to-yellow-300 text-transparent bg-clip-text",
         className
       )}
       {...props}

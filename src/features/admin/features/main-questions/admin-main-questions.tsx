@@ -59,14 +59,15 @@ export function AdminMainQuestions() {
                     <CountdownTimer />
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-8 gap-x-20 w-6/8 mx-auto">
+                <div className="grid grid-cols-2 gap-8 gap-x-20 w-9/10 max-w-3xl mx-auto">
                   {currentQuestion.question.answers.map((answer) => (
                     <Answer
                       key={answer.id}
                       answer={answer}
                       hasTimedOut={false}
                       selectedAnswerId={null}
-                      onAnswer={() => { }}
+                      onAnswer={() => {}}
+                      className="pointer-events-none"
                     />
                   ))}
                 </div>

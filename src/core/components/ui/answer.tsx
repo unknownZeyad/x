@@ -16,6 +16,7 @@ type AnswerProps = {
 } & React.ComponentProps<"button">;
 
 export function Answer({
+  className,
   answer,
   onAnswer,
   selectedAnswerId,
@@ -46,7 +47,8 @@ export function Answer({
         isCorrect === false && "border-red-500/80",
         isCorrect === true && "border-green-500/80",
         hasTimedOut && "border-red-500/80",
-        (props.disabled || hasTimedOut) && "pointer-events-none"
+        (props.disabled || hasTimedOut) && "pointer-events-none",
+        className
       )}
       {...props}
     >
