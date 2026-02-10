@@ -7,6 +7,7 @@ import {
   useState,
 } from "react";
 import { useAdminSocket } from "./admin-socket-provider";
+import { useAdminPhases } from "./admin-phases-provider";
 
 export type AdminTeamInfo = {
   club: Club | null;
@@ -17,6 +18,7 @@ type ContextData = {
   team2: AdminTeamInfo;
   currentQuestion: { club: Club; question: MainQuestion; score: number } | null;
   answerResult: MainQuestionAnswerResult | null;
+  winner: { name: string; score: number; club: Club } | null;
 };
 
 const Context = createContext<ContextData>({
@@ -24,15 +26,19 @@ const Context = createContext<ContextData>({
   team2: { club: null },
   currentQuestion: null,
   answerResult: null,
+  winner: null,
 });
 
 export function AdminDataProvider({ children }: { children: React.ReactNode }) {
   const { socket } = useAdminSocket();
+  const { setPhase } = useAdminPhases();
+
   const [team1Club, setTeam1Club] = useState<Club | null>(null);
   const [team2Club, setTeam2Club] = useState<Club | null>(null);
   const [currentQuestion, setCurrentQuestion] = useState<
     ContextData["currentQuestion"] | null
   >(null);
+  const [winner, setWinner] = useState<ContextData["winner"] | null>(null);
   const [answerResult, setAnswerResult] =
     useState<MainQuestionAnswerResult | null>(null);
 
@@ -42,8 +48,9 @@ export function AdminDataProvider({ children }: { children: React.ReactNode }) {
       team2: { club: team2Club },
       currentQuestion: currentQuestion,
       answerResult: answerResult,
+      winner: winner,
     };
-  }, [team1Club, team2Club, currentQuestion, answerResult]);
+  }, [team1Club, team2Club, currentQuestion, answerResult, winner]);
 
   useLayoutEffect(() => {
     if (!socket) return;
@@ -64,6 +71,11 @@ export function AdminDataProvider({ children }: { children: React.ReactNode }) {
       if (parsed.event === "main_question_answer_result") {
         console.log("answer result", parsed.data);
         setAnswerResult(parsed.data);
+      }
+
+      if (parsed.event === "winner") {
+        setWinner(parsed.data);
+        setPhase("winner");
       }
     }
 

@@ -161,6 +161,7 @@ export function TeamMainQuestions() {
   useEffect(() => {
     function onMessage(event: MessageEvent) {
       const data = parse<ServerTeamMessage>(event.data);
+      console.log("RECEIVED MESSAGE", data);
       if (data.event === "magic_card_question") {
         setQuestions((prev) => {
           return prev.map((question) => {
@@ -238,7 +239,13 @@ export function TeamMainQuestions() {
             >
               <div className="mt-3 flex gap-3">
                 <img
-                  className="w-48 object-contain aspect-square overflow-hidden"
+                  className={cn(
+                    "w-48 object-contain aspect-square border-2 border-amber-500 overflow-hidden shadow-2xl shadow-amber-500/30 hover:cursor-pointer hover:scale-105 transition-all duration-300",
+                    magicCardUsed
+                      ? "opacity-50 pointer-events-none"
+                      : "opacity-100",
+                    canScroll && "pointer-events-none opacity-50"
+                  )}
                   src="/assets/images/magic-card.webp"
                   alt=""
                   onClick={handleMagicCard}
