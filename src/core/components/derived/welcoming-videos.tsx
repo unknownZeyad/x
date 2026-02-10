@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import { motion, AnimatePresence, Variants } from "motion/react";
+import { motion, AnimatePresence, Variants, HTMLMotionProps } from "motion/react";
 
 import sobiLogo from "@public/assets/images/Sobi-Logo.webp";
 import sobiFantasyGameLogo from "@public/assets/images/Sobi-Fantasy-Game-Logo.webp";
@@ -109,9 +109,9 @@ export default function WelcomingVideos({
             <video
               src="/assets/videos/intro.mp4"
               className="w-full h-full object-cover"
-              autoPlay
               playsInline
               muted
+              autoPlay
               preload="auto"
               onEnded={onEnd}
             />

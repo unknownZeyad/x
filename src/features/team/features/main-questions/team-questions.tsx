@@ -420,12 +420,12 @@ function QuestionsCarousel({
                   className={cn(
                     "w-40 object-contain rounded-3xl overflow-hidden",
                     canSelectNewQuestion &&
-                      !isDisabled &&
-                      "hover:cursor-pointer hover:scale-105 transition-all duration-300",
+                    !isDisabled &&
+                    "hover:cursor-pointer hover:scale-105 transition-all duration-300",
                     isDisabled && "grayscale pointer-events-none",
                     isSelected &&
-                      !isDisabled &&
-                      "border-4 border-yellow-500 shadow-lg shadow-yellow-500/70"
+                    !isDisabled &&
+                    "border-4 border-yellow-500 shadow-lg shadow-yellow-500/70"
                   )}
                   src={question.img_url}
                   alt=""

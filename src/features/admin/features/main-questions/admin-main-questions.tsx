@@ -11,14 +11,23 @@ import CountdownTimer from "@/core/components/ui/counter";
 import { TeamLogo } from "@/core/components/ui/team-logo";
 import { useAdminData } from "../../providers/admin-data-provider";
 import { AnswerResultScreen } from "./answer-result-screen";
+import { useAudio } from "@/core/providers/audio-provider";
+import { useEffect } from "react";
 
 export function AdminMainQuestions() {
+  const { playAudio } = useAudio()
   const { currentQuestion, answerResult } = useAdminData();
   if (!currentQuestion) return null;
 
   if (answerResult) {
     return <AnswerResultScreen answerResult={answerResult} />;
   }
+
+  useEffect(() => {
+    if (currentQuestion) {
+      playAudio(currentQuestion.question.audio_url)
+    }
+  }, [currentQuestion])
 
   return (
     <EnterExit>

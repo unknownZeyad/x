@@ -24,7 +24,6 @@ function SpeedIntro() {
         autoPlay
         playsInline
         preload="auto"
-        muted
         initial={{ opacity: 0, scale: 1.05, filter: "blur(16px)" }}
         animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
         exit={{ opacity: 0, scale: 0.98, filter: "blur(12px)" }}
@@ -42,7 +41,7 @@ function SpeedIntro() {
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
         >
           <GameButton
-            // disabled={!videoEnded}
+            disabled={!videoEnded}
             onClick={startSpeedQuestion}
           >Start</GameButton>
           <motion.p

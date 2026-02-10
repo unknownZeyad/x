@@ -2,57 +2,46 @@
 
 import ContentLayout from "@/core/components/layout/content-layout";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import person from '@public/assets/images/person.png'
-import chooseYourTeamImg from '@public/assets/images/choose_your_team.jpg'
 import { useTeamInfo } from "../../providers/info-provider";
 import { useTeamSocket } from "../../providers/socket-provider";
-
-import realMadridLogo from '@public/assets/images/real-madrid-logo.png'
-import alNassrLogo from '@public/assets/images/al-nassr-logo.png'
-import barcelonaLogo from '@public/assets/images/barcelona-logo.png'
-import alHilalLogo from '@public/assets/images/al-hilal-logo.png'
 import holdPopupImg from "@public/assets/images/SFG-Pop up Msg's-webp_Artboard 3.webp"
 import { cn, parse } from "@/core/lib/utils";
 import { motion, AnimatePresence } from "motion/react";
 
-const logoMap: Record<string, any> = {
-    "REAL MADRID": realMadridLogo,
-    "AL NASSR": alNassrLogo,
-    "BARCELONA": barcelonaLogo,
-    "AL HILAL": alHilalLogo,
-};
 
-export default function ChooseClubs({ hold, otherTeamClub, clubs }: { hold: boolean, otherTeamClub: number | null, clubs: Club[] | null }) {
+export default function ChooseClubs({ clubs, hold, setHold }: {
+    clubs: Club[] | null,
+    hold: boolean,
+    setHold: Dispatch<SetStateAction<boolean>>
+}) {
     const { teamInfo, setTeamInfo } = useTeamInfo();
     const [currId, setCurrId] = useState<number | null>(null);
     const { socket } = useTeamSocket();
     const choosenClubId = teamInfo?.choosen_club?.id;
+    const [takenId, setTakenId] = useState<number | null>(null)
 
     const displayedClubs = clubs?.map(c => ({
         ...c,
-        logo: c.card_img_url || logoMap[c.name.toUpperCase()] || realMadridLogo
+        logo: c.card_img_url
     })) || [];
 
-    const didChoose = Boolean(teamInfo?.choosen_club?.id);
+    const didChoose = Boolean(choosenClubId);
     const canConfirm = currId !== null && currId !== choosenClubId;
-
 
     useEffect(() => {
         socket?.addEventListener('message', (event) => {
             const data = parse<ServerTeamMessage>(event.data);
             if (data.event === 'unhold_choosing_club') {
-                setTeamInfo(prev => ({
-                    ...prev,
-                    choosen_club: clubs?.find(c => c.id === data.data.choosen_club_id) || null
-                }))
+                setTakenId(data.data.choosen_club_id)
+                setHold(false)
             }
         })
     }, [socket])
 
 
     const handleConfirm = () => {
-        console.log(currId)
         setTeamInfo(prev => ({
             ...prev,
             choosen_club: clubs?.find(c => c.id === currId) || null
@@ -76,7 +65,7 @@ export default function ChooseClubs({ hold, otherTeamClub, clubs }: { hold: bool
                             {/* Club Cards Grid with staggered animation */}
                             <div className='grid p-8 grid-cols-4 gap-6 mb-1.25 mt-10'>
                                 {displayedClubs.map((team) => {
-                                    const isLocked = otherTeamClub === team.id && choosenClubId !== team.id;
+                                    const isLocked = takenId === team.id;
                                     const isSelected = currId === team.id;
                                     const isChoosenClub = choosenClubId === team.id;
 

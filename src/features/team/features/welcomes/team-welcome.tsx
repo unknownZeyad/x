@@ -3,9 +3,11 @@
 import { motion } from "motion/react";
 import { useTeamInfo } from "../../providers/info-provider";
 import EnterExit from "@/core/components/derived/enter-exit";
+import { useEffect, useRef } from "react";
 
 export default function TeamWelcome() {
     const { teamInfo } = useTeamInfo()
+
     return (
         <EnterExit className="overflow-hidden">
             <motion.video
@@ -13,7 +15,6 @@ export default function TeamWelcome() {
                 className="absolute inset-0 w-full h-full object-cover"
                 autoPlay
                 playsInline
-                muted
                 preload="auto"
                 initial={{ opacity: 0, scale: 1.05, filter: "blur(16px)" }}
                 animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}

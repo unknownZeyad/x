@@ -58,7 +58,6 @@ export default function StartExperince() {
         }}
         whileTap={{ scale: 0.96, y: 1 }}
         onClick={handleClick}
-        disabled={!canStart}
         className="relative px-16 py-5 uppercase tracking-[0.35em] text-[15px] font-medium text-neutral-300 border border-neutral-600 bg-black cursor-pointer outline-none"
       >
         <span className="pointer-events-none absolute inset-[3px] border border-neutral-700" />

@@ -43,7 +43,6 @@ function SpeedQuestion() {
     })
   }, [socket])
 
-
   function handleNext() {
     socket?.send(JSON.stringify({ event: 'start_choosing_clubs' }))
     setPhase('choosing_clubs')

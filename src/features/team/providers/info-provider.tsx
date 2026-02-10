@@ -28,7 +28,7 @@ const Context = createContext<{
   setTeamInfo: React.Dispatch<React.SetStateAction<TeamInfo>>;
   teamInfo: TeamInfo;
 }>({
-  setTeamInfo: () => {},
+  setTeamInfo: () => { },
   teamInfo: null!,
 });
 
@@ -64,20 +64,11 @@ export default function TeamInfoProvider({
     if (!socket) return;
 
     const onMessage = ({ data }: MessageEvent) => {
-      const parsed = parse<any>(data);
+      const parsed = parse<ServerTeamMessage>(data);
 
-      // Handle the specific 'your_team' event
       if (parsed.event === "your_team") {
+        console.log('before team welcome in the provider = ', parsed.data)
         setTeamInfo((prev) => ({ ...prev, ...parsed.data }));
-      }
-
-      // Handle full state updates
-      if (parsed.team1 && parsed.team2) {
-        if (teamId === "team1") {
-          setTeamInfo((prev) => ({ ...prev, ...parsed.team1 }));
-        } else if (teamId === "team2") {
-          setTeamInfo((prev) => ({ ...prev, ...parsed.team2 }));
-        }
       }
     };
 
