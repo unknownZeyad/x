@@ -67,6 +67,7 @@ export function AnswerResultScreen({
                   alt={isCorrect ? "Goal" : "Miss"}
                   width={250}
                   height={350}
+                  unoptimized
                   className="object-contain"
                 />
               </motion.div>

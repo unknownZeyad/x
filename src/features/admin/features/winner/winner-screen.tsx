@@ -16,7 +16,7 @@ export function WinnerScreen() {
 
   return (
     <EnterExit>
-      <ContentLayout>
+      <ContentLayout backgroundVideoSrc="/assets/videos/FinalWinner.mp4">
         <div className="flex flex-col items-end gap-4">
           <PhaseCard>
             <PhaseCardHeader
