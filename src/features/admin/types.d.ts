@@ -100,4 +100,12 @@ declare type ServerAdminMessage =
         club: Club;
         score: number;
       };
+    }
+  | {
+      event: "winner";
+      data: {
+        name: string;
+        score: number;
+        club: Club;
+      };
     };

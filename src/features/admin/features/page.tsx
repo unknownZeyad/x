@@ -3,13 +3,13 @@
 import { AnimatePresence } from "motion/react";
 import { useAdminPhases } from "@/features/admin/providers/admin-phases-provider";
 import StartExperince from "./start-experience/start-experience";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useAdminSocket } from "../providers/admin-socket-provider";
 import { parse } from "@/core/lib/utils";
 import SpeedQuestion from "./speed-question/speed-question";
-import ChosenClubs from "./chosen-clubs/chosen-clubs";
 import { AdminMainQuestions } from "./main-questions/admin-main-questions";
 import { ChoosingClub } from "./choosing-club/choosing-club";
+import { WinnerScreen } from "./winner/winner-screen";
 
 export default function Admin() {
   const { phase, setPhase } = useAdminPhases();
@@ -49,6 +49,7 @@ export default function Admin() {
         )}
         {/* {phase === "choosing_clubs" && <ChoosingClub />} */}
         {phase === "main_questions" && <AdminMainQuestions />}
+        {phase === "winner" && <WinnerScreen />}
       </AnimatePresence>
     </div>
   );
