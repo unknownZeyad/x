@@ -15,13 +15,9 @@ import { AnswerResultScreen } from "./answer-result-screen";
 export function AdminMainQuestions() {
   const { currentQuestion, answerResult } = useAdminData();
 
-  if (!currentQuestion) return null;
-
   if (answerResult) {
     return <AnswerResultScreen answerResult={answerResult} />;
   }
-
-  const score = currentQuestion.score;
 
   return (
     <EnterExit>
@@ -35,7 +31,7 @@ export function AdminMainQuestions() {
               }}
             />
             <PhaseCardContent
-              className="space-y-3 relative"
+              className="relative"
               imageProps={{
                 className: "hidden",
               }}
@@ -43,58 +39,78 @@ export function AdminMainQuestions() {
                 className: "bg-transparent",
               }}
             >
-              <div className="py-8 space-y-10 bg-black/50 px-16">
-                <div className="flex justify-between gap-6">
-                  <div className="size-28 shrink-0">
-                    <img
-                      className="w-full h-full object-contain"
-                      src="/assets/images/icons/golden-trophy.webp"
-                      alt=""
-                    />
+              {currentQuestion ? (
+                <div className="space-y-3">
+                  <div className="py-8 space-y-10 bg-black/50 px-16">
+                    <div className="flex justify-between gap-6">
+                      <div className="size-28 shrink-0">
+                        <img
+                          className="w-full h-full object-contain"
+                          src="/assets/images/icons/golden-trophy.webp"
+                          alt=""
+                        />
+                      </div>
+                      <h1 className="text-3xl font-bold text-center uppercase">
+                        {currentQuestion.question.question}
+                      </h1>
+                      <div className="size-24 shrink-0">
+                        <CountdownTimer />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-8 gap-x-20 w-9/10 max-w-3xl mx-auto">
+                      {currentQuestion.question.answers.map((answer) => (
+                        <Answer
+                          key={answer.id}
+                          answer={answer}
+                          hasTimedOut={false}
+                          selectedAnswerId={null}
+                          onAnswer={() => {}}
+                          className="pointer-events-none"
+                        />
+                      ))}
+                    </div>
                   </div>
-                  <h1 className="text-3xl font-bold text-center uppercase">
-                    {currentQuestion.question.question}
-                  </h1>
-                  <div className="size-24 shrink-0">
-                    <CountdownTimer />
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-8 gap-x-20 w-9/10 max-w-3xl mx-auto">
-                  {currentQuestion.question.answers.map((answer) => (
-                    <Answer
-                      key={answer.id}
-                      answer={answer}
-                      hasTimedOut={false}
-                      selectedAnswerId={null}
-                      onAnswer={() => {}}
-                      className="pointer-events-none"
-                    />
-                  ))}
-                </div>
-              </div>
 
-              <div className="flex justify-between items-center bg-black/50 px-20 border-l border-yellow-500 py-8 border-r border-t">
-                <div className="flex-1">
-                  <TeamLogo
-                    src={currentQuestion.club.logo_img_url}
-                    name={currentQuestion.club.name}
-                  />
-                </div>
-                <div className="flex flex-col items-center">
-                  <div className="text-3xl font-bold">SCORE</div>
-                  <div className="text-7xl px-5 font-bold italic bg-linear-to-r from-yellow-500 via-yellow-100 to-yellow-300 text-transparent bg-clip-text">
-                    {score}
+                  <div className="flex justify-between items-center bg-black/50 px-20 border-l border-yellow-500 py-8 border-r border-t">
+                    <div className="flex-1">
+                      <TeamLogo
+                        src={currentQuestion.club.logo_img_url}
+                        name={currentQuestion.club.name}
+                      />
+                    </div>
+                    <div className="flex flex-col items-center">
+                      <div className="text-3xl font-bold">SCORE</div>
+                      <div className="text-7xl px-5 font-bold italic bg-linear-to-r from-yellow-500 via-yellow-100 to-yellow-300 text-transparent bg-clip-text">
+                        {currentQuestion.score}
+                      </div>
+                      <div className="text-sm font-bold">TOTAL POINTS</div>
+                    </div>
+                    <div className="flex-1">
+                      <img
+                        className="rounded-2xl ml-auto w-40 aspect-4/5"
+                        src={currentQuestion.club.name_img_url}
+                        alt="Footer"
+                      />
+                    </div>
                   </div>
-                  <div className="text-sm font-bold">TOTAL POINTS</div>
                 </div>
-                <div className="flex-1">
+              ) : (
+                <div className="py-20 px-16 bg-black/50 flex flex-col items-center justify-center space-y-8">
                   <img
-                    className="rounded-2xl ml-auto w-40 aspect-4/5"
-                    src={currentQuestion.club.name_img_url}
-                    alt="Footer"
+                    className="object-contain size-32 shrink-0"
+                    src="/assets/images/icons/golden-trophy.webp"
+                    alt=""
                   />
+                  <div className="space-y-3 text-center">
+                    <h1 className="text-4xl font-bold uppercase bg-linear-to-r from-yellow-500 via-yellow-100 to-yellow-300 text-transparent bg-clip-text">
+                      No Question Selected
+                    </h1>
+                    <p className="text-xl text-gray-300 font-medium">
+                      Please select a question to display
+                    </p>
+                  </div>
                 </div>
-              </div>
+              )}
             </PhaseCardContent>
             <PhaseCardFooter />
           </PhaseCard>
