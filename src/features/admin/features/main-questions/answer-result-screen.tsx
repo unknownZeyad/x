@@ -85,6 +85,7 @@ export function AnswerResultScreen({
                     isCorrect
                       ? "/assets/images/Goal.png"
                       : "/assets/images/missGoal.png"
+
                   }
                   alt={isCorrect ? "Goal" : "Miss"}
                   width={250}
