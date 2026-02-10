@@ -111,7 +111,7 @@ export function AnswerResultScreen({
                 <div className="flex-1">
                   <img
                     className="rounded-2xl ml-auto w-40 aspect-4/5"
-                    src={answerResult.club.logo_img_url}
+                    src={answerResult.question_img}
                     alt={answerResult.club.name}
                   />
                 </div>

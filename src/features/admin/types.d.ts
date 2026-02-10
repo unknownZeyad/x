@@ -5,6 +5,7 @@ declare type MainQuestionAnswerResult = {
   used_magic_card: boolean;
   team_name: string;
   club: Club;
+  question_img: string
 };
 
 declare type ServerAdminMessage =
