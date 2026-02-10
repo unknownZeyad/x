@@ -14,6 +14,7 @@ import { AnswerResultScreen } from "./answer-result-screen";
 
 export function AdminMainQuestions() {
   const { currentQuestion, answerResult } = useAdminData();
+  if (!currentQuestion) return null;
 
   if (answerResult) {
     return <AnswerResultScreen answerResult={answerResult} />;
@@ -64,7 +65,7 @@ export function AdminMainQuestions() {
                           answer={answer}
                           hasTimedOut={false}
                           selectedAnswerId={null}
-                          onAnswer={() => {}}
+                          onAnswer={() => { }}
                           className="pointer-events-none"
                         />
                       ))}

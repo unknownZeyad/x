@@ -31,7 +31,7 @@ export default function ChooseClubs({ hold, otherTeamClub, clubs }: { hold: bool
 
     const displayedClubs = clubs?.map(c => ({
         ...c,
-        logo: c.logo_img_url || logoMap[c.name.toUpperCase()] || realMadridLogo
+        logo: c.card_img_url || logoMap[c.name.toUpperCase()] || realMadridLogo
     })) || [];
 
     const didChoose = Boolean(teamInfo?.choosen_club?.id);
@@ -52,16 +52,16 @@ export default function ChooseClubs({ hold, otherTeamClub, clubs }: { hold: bool
 
 
     const handleConfirm = () => {
-        // if (!didChoose) {
-        setTeamInfo(prev => ({
-            ...prev,
-            choosen_club: clubs?.find(c => c.id === currId) || null
-        }))
-        socket?.send(JSON.stringify({
-            event: 'choose_club',
-            data: { club_id: currId }
-        }))
-        // }
+        if (!didChoose) {
+            setTeamInfo(prev => ({
+                ...prev,
+                choosen_club: clubs?.find(c => c.id === currId) || null
+            }))
+            socket?.send(JSON.stringify({
+                event: 'choose_club',
+                data: { club_id: currId }
+            }))
+        }
     };
 
     return (
@@ -75,13 +75,12 @@ export default function ChooseClubs({ hold, otherTeamClub, clubs }: { hold: bool
                     <div className='absolute inset-0 flex flex-col justify-center items-center'>
                         <div className='flex flex-col items-center justify-center text-center px-6 animate-in fade-in zoom-in duration-500'>
                             {/* Club Cards Grid with staggered animation */}
-                            <div className='grid grid-cols-4 gap-6 mb-1.25 mt-10'>
-                                {displayedClubs.map((team, index) => {
+                            <div className='grid p-8 grid-cols-4 gap-6 mb-1.25 mt-10'>
+                                {displayedClubs.map((team) => {
                                     const isLocked = otherTeamClub === team.id && choosenClubId !== team.id;
                                     const isSelected = currId === team.id;
                                     const isChoosenClub = choosenClubId === team.id;
 
-                                    // Disable selection for chosen club
                                     const isDisabled = isLocked || hold || isChoosenClub;
 
                                     return (
@@ -103,9 +102,8 @@ export default function ChooseClubs({ hold, otherTeamClub, clubs }: { hold: bool
                                             }}
                                             transition={{
                                                 type: 'spring',
-                                                stiffness: 120,
+                                                stiffness: 80,
                                                 damping: 12,
-                                                delay: 0.5 + index * 0.05
                                             }}
                                             whileHover={!isDisabled ? {
                                                 scale: 1.05,
@@ -116,20 +114,9 @@ export default function ChooseClubs({ hold, otherTeamClub, clubs }: { hold: bool
                                         >
                                             <motion.div
                                                 className='rounded-xl mb-3 relative'
-                                                animate={isSelected ? {
-                                                    boxShadow: [
-                                                        '0 0 0px rgba(34, 197, 94, 0)',
-                                                        '0 0 30px rgba(34, 197, 94, 0.8)',
-                                                        '0 0 0px rgba(34, 197, 94, 0)'
-                                                    ]
-                                                } : {}}
-                                                transition={isSelected ? { duration: 1.5, repeat: Infinity } : {}}
                                             >
-                                                <Image
+                                                <img
                                                     src={team.logo}
-                                                    width={120}
-                                                    height={120}
-                                                    unoptimized
                                                     alt={`${team.name} logo`}
                                                     className='object-contain rounded-2xl w-full'
                                                 />
@@ -236,40 +223,44 @@ export default function ChooseClubs({ hold, otherTeamClub, clubs }: { hold: bool
                             </AnimatePresence>
 
                             {/* Confirm Button */}
-                            <motion.div
-                                className='flex justify-center'
-                                initial={{ opacity: 0, y: 30 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ type: 'spring', stiffness: 100, delay: 1.2 }}
-                            >
-                                <motion.button
-                                    type="button"
-                                    onClick={handleConfirm}
-                                    disabled={!canConfirm}
-                                    className={cn(
-                                        "relative z-10 px-20 py-3 rounded-full text-white font-bold text-lg cursor-pointer border-2 border-amber-400",
-                                        (!canConfirm ? 'bg-gray-600 cursor-not-allowed opacity-50 font-normal italic' : 'bg-linear-to-r from-green-400 to-green-500 shadow-xl')
-                                    )}
-                                    whileHover={canConfirm ? {
-                                        scale: 1.05,
-                                        boxShadow: '0 0 30px rgba(34, 197, 94, 0.6)',
-                                        transition: { type: 'spring', stiffness: 400 }
-                                    } : undefined}
-                                    whileTap={canConfirm ? { scale: 0.95 } : undefined}
-                                    animate={canConfirm ? {
-                                        boxShadow: [
-                                            '0 4px 20px rgba(34, 197, 94, 0.3)',
-                                            '0 4px 40px rgba(34, 197, 94, 0.6)',
-                                            '0 4px 20px rgba(34, 197, 94, 0.3)'
-                                        ]
-                                    } : {}}
-                                    transition={canConfirm ? { duration: 1.5, repeat: Infinity } : {}}
-                                >
-                                    <span className="relative z-10">
-                                        Confirm
-                                    </span>
-                                </motion.button>
-                            </motion.div>
+                            <AnimatePresence>
+                                {!hold && (
+                                    <motion.div
+                                        className='flex justify-center'
+                                        initial={{ opacity: 0, y: 30 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ type: 'spring', stiffness: 100, delay: 1.2 }}
+                                    >
+                                        <motion.button
+                                            type="button"
+                                            onClick={handleConfirm}
+                                            disabled={!canConfirm || hold}
+                                            className={cn(
+                                                "relative z-10 px-20 py-3 rounded-full text-white font-bold text-lg cursor-pointer border-2 border-amber-400",
+                                                (!canConfirm ? 'bg-gray-600 cursor-not-allowed opacity-50 font-normal italic' : 'bg-linear-to-r from-green-400 to-green-500 shadow-xl')
+                                            )}
+                                            whileHover={canConfirm ? {
+                                                scale: 1.05,
+                                                boxShadow: '0 0 30px rgba(34, 197, 94, 0.6)',
+                                                transition: { type: 'spring', stiffness: 400 }
+                                            } : undefined}
+                                            whileTap={canConfirm ? { scale: 0.95 } : undefined}
+                                            animate={canConfirm ? {
+                                                boxShadow: [
+                                                    '0 4px 20px rgba(34, 197, 94, 0.3)',
+                                                    '0 4px 40px rgba(34, 197, 94, 0.6)',
+                                                    '0 4px 20px rgba(34, 197, 94, 0.3)'
+                                                ]
+                                            } : {}}
+                                            transition={canConfirm ? { duration: 1.5, repeat: Infinity } : {}}
+                                        >
+                                            <span className="relative z-10">
+                                                Confirm
+                                            </span>
+                                        </motion.button>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
                         </div>
                     </div>
                 </div>

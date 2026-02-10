@@ -75,7 +75,7 @@ export function AnswerResultScreen({
               <div className="flex justify-between items-center bg-black/50 px-20 border-l border-yellow-500 py-8 border-r border-t">
                 <div className="flex-1">
                   <TeamLogo
-                    src={answerResult.club.img_url}
+                    src={answerResult.club.logo_img_url}
                     name={answerResult.club.name}
                   />
                 </div>
@@ -89,7 +89,7 @@ export function AnswerResultScreen({
                 <div className="flex-1">
                   <img
                     className="rounded-2xl ml-auto w-40 aspect-4/5"
-                    src={answerResult.club.img_url}
+                    src={answerResult.club.logo_img_url}
                     alt={answerResult.club.name}
                   />
                 </div>

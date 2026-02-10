@@ -16,7 +16,6 @@ import { useAdminSocket } from "../../providers/admin-socket-provider";
 import { useEffect, useLayoutEffect, useState } from "react";
 import { useAdminPhases } from "../../providers/admin-phases-provider";
 import { motion } from "motion/react";
-// Removed invalid import. Use JSON.parse instead.
 import { useAudio } from "@/core/providers/audio-provider";
 
 export function ChoosingClub() {
@@ -123,7 +122,6 @@ export function ChoosingClub() {
 function TeamCard({ team, index, confirmedClub }: { team: AdminTeamInfo; index: number; confirmedClub?: Club | null }) {
   const isLeft = index === 0;
 
-  // Show confirmed club if available, else fallback to team.club, else show waiting
   const clubToShow = confirmedClub || team.club;
 
   if (!clubToShow) {
