@@ -10,6 +10,7 @@ declare type TeamID = 'team1' | 'team2'
 
 declare type SpeedQuestion = {
   question: string;
+  audio_url: string;
   answers: {
     answer: string;
     is_correct: boolean;
