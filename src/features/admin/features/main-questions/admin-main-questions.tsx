@@ -56,7 +56,7 @@ export function AdminMainQuestions() {
                     {currentQuestion.question.question}
                   </h1>
                   <div className="size-24 shrink-0">
-                    <CountdownTimer />
+                    <CountdownTimer initialSeconds={60} />
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-8 gap-x-20 w-6/8 mx-auto">
