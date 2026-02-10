@@ -16,13 +16,6 @@ import holdPopupImg from "@public/assets/images/SFG-Pop up Msg's-webp_Artboard 3
 import { cn, parse } from "@/core/lib/utils";
 import { motion, AnimatePresence } from "motion/react";
 
-const teams = [
-    { id: 1, name: "REAL MADRID", logo: realMadridLogo },
-    { id: 2, name: "AL NASSR", logo: alNassrLogo },
-    { id: 3, name: "BARCELONA", logo: barcelonaLogo },
-    { id: 4, name: "AL HILAL", logo: alHilalLogo },
-];
-
 const logoMap: Record<string, any> = {
     "REAL MADRID": realMadridLogo,
     "AL NASSR": alNassrLogo,
@@ -36,10 +29,10 @@ export default function ChooseClubs({ hold, otherTeamClub, clubs }: { hold: bool
     const { socket } = useTeamSocket();
     const choosenClubId = teamInfo?.choosen_club?.id;
 
-    const displayedClubs = clubs ? clubs.map(c => ({
+    const displayedClubs = clubs?.map(c => ({
         ...c,
-        logo: c.img_url || logoMap[c.name.toUpperCase()] || realMadridLogo
-    })) : teams;
+        logo: c.logo_img_url || logoMap[c.name.toUpperCase()] || realMadridLogo
+    })) || [];
 
     const didChoose = Boolean(teamInfo?.choosen_club?.id);
     const canConfirm = currId !== null && currId !== choosenClubId;
@@ -60,14 +53,14 @@ export default function ChooseClubs({ hold, otherTeamClub, clubs }: { hold: bool
 
     const handleConfirm = () => {
         // if (!didChoose) {
-            setTeamInfo(prev => ({
-                ...prev,
-                choosen_club: clubs?.find(c => c.id === currId) || null
-            }))
-            socket?.send(JSON.stringify({
-                event: 'choose_club',
-                data: { club_id: currId }
-            }))
+        setTeamInfo(prev => ({
+            ...prev,
+            choosen_club: clubs?.find(c => c.id === currId) || null
+        }))
+        socket?.send(JSON.stringify({
+            event: 'choose_club',
+            data: { club_id: currId }
+        }))
         // }
     };
 

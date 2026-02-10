@@ -215,9 +215,9 @@ export function TeamMainQuestions() {
       <ContentLayout personSrc="/assets/images/person.png">
         <div className="flex flex-col items-end gap-4">
           <PhaseCard>
-            <PhaseCardHeader className="flex items-center justify-between">
+            <PhaseCardHeader className="flex p-2 items-center justify-between">
               <TeamLogo
-                src={teamInfo.choosen_club?.img_url ?? ""}
+                src={teamInfo.choosen_club?.logo_img_url ?? ""}
                 name={teamInfo.choosen_club?.name ?? ""}
                 className="text-black flex-1"
               />
@@ -422,7 +422,7 @@ function Score({ score, className, ...props }: ScoreProps) {
   return (
     <div
       className={cn(
-        "text-7xl px-5 font-bold italic bg-linear-to-r from-yellow-500 via-yellow-100 to-yellow-300 text-transparent bg-clip-text",
+        "text-5xl px-5 font-bold italic bg-linear-to-r from-yellow-500 via-yellow-100 to-yellow-300 text-transparent bg-clip-text",
         className
       )}
       {...props}

@@ -66,7 +66,7 @@ export function AdminMainQuestions() {
                       answer={answer}
                       hasTimedOut={false}
                       selectedAnswerId={null}
-                      onAnswer={() => {}}
+                      onAnswer={() => { }}
                     />
                   ))}
                 </div>
@@ -75,7 +75,7 @@ export function AdminMainQuestions() {
               <div className="flex justify-between items-center bg-black/50 px-20 border-l border-yellow-500 py-8 border-r border-t">
                 <div className="flex-1">
                   <TeamLogo
-                    src={currentQuestion.club.img_url}
+                    src={currentQuestion.club.logo_img_url}
                     name={currentQuestion.club.name}
                   />
                 </div>
@@ -89,7 +89,7 @@ export function AdminMainQuestions() {
                 <div className="flex-1">
                   <img
                     className="rounded-2xl ml-auto w-40 aspect-4/5"
-                    src={currentQuestion.club.img_url}
+                    src={currentQuestion.club.name_img_url}
                     alt="Footer"
                   />
                 </div>

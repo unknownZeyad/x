@@ -1,5 +1,6 @@
 declare type Club = {
-  img_url: string,
+  logo_img_url: string,
+  name_img_url: string,
   id: number,
   name: string
 }
