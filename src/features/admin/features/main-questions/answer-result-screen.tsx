@@ -10,6 +10,21 @@ import ContentLayout from "@/core/components/layout/content-layout";
 import EnterExit from "@/core/components/derived/enter-exit";
 import { TeamLogo } from "@/core/components/ui/team-logo";
 
+import { useAudio } from "@/core/providers/audio-provider";
+import { useLayoutEffect } from "react";
+
+const CORRECT_AUDIOS = [
+  '/assets/audios/Correct Answers/Correct answer_opt 1.mp3',
+  '/assets/audios/Correct Answers/Correct answer_opt 2.mp3',
+  '/assets/audios/Correct Answers/Correct answer_opt 3.mp3',
+]
+
+const WRONG_AUDIOS = [
+  '/assets/audios/Wrong Answers/Wrong answers_opt 1.mp3',
+  '/assets/audios/Wrong Answers/Wrong answers_opt 2.mp3',
+  '/assets/audios/Wrong Answers/Wrong answers_opt 3.mp3',
+]
+
 export function AnswerResultScreen({
   answerResult,
 }: {
@@ -18,6 +33,13 @@ export function AnswerResultScreen({
   const isCorrect = answerResult.is_correct;
   const scoreChange = answerResult.question_points;
   const score = answerResult.score;
+  const { playAudio } = useAudio()
+
+  useLayoutEffect(() => {
+    const audios = isCorrect ? CORRECT_AUDIOS : WRONG_AUDIOS
+    const random = audios[Math.floor(Math.random() * audios.length)]
+    playAudio(random)
+  }, [])
 
   return (
     <EnterExit>

@@ -17,6 +17,7 @@ import { useEffect, useLayoutEffect, useState } from "react";
 import { useAdminPhases } from "../../providers/admin-phases-provider";
 import { motion } from "motion/react";
 import { useAudio } from "@/core/providers/audio-provider";
+import person from '@public/assets/images/person.png'
 
 export function ChoosingClub() {
   const { team1, team2 } = useAdminData();
@@ -64,7 +65,7 @@ export function ChoosingClub() {
 
   return (
     <EnterExit>
-      <ContentLayout>
+      <ContentLayout personSrc={person.src}>
         <div className="flex flex-col items-end gap-4">
           <motion.div
             initial={{ opacity: 0, scale: 0.8, y: 50 }}

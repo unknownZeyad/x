@@ -11,9 +11,12 @@ import { AdminMainQuestions } from "./main-questions/admin-main-questions";
 import { ChoosingClub } from "./choosing-club/choosing-club";
 import { WinnerScreen } from "./winner/winner-screen";
 
+import { useAudio } from "@/core/providers/audio-provider";
+
 export default function Admin() {
   const { phase, setPhase } = useAdminPhases();
   const { socket } = useAdminSocket();
+  const { playAudio } = useAudio();
 
   useEffect(() => {
     if (!socket) return;
@@ -22,6 +25,12 @@ export default function Admin() {
       const parsed = parse<any>(data)
 
       const event = parsed.event;
+      if (parsed.data?.audio_url) {
+        playAudio(parsed.data.audio_url)
+      } else if (parsed.data?.question?.audio_url) {
+        playAudio(parsed.data.question.audio_url)
+      }
+
       if (event === "experience_started") setPhase("speed_question")
       if (event === "choosing_clubs") setPhase('choosing_clubs');
       if (event === "start_main_questions") setPhase('main_questions');
