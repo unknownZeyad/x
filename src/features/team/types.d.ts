@@ -10,6 +10,15 @@ declare type MainQuestion = {
   }[];
 };
 
+declare type MagicQuestion = {
+  question: string;
+  answers: {
+    answer: string;
+    is_correct: boolean;
+    id: number;
+  }[];
+};
+
 declare type ServerTeamMessage =
   | {
       event: "experience_started";
@@ -56,12 +65,7 @@ declare type ServerTeamMessage =
   | {
       event: "magic_card_question";
       data: {
-        question: string;
-        answers: {
-          answer: string;
-          is_correct: boolean;
-          id: number;
-        }[];
+        question: MagicQuestion;
       };
     }
   | {

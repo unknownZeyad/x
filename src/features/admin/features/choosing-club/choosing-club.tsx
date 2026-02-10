@@ -7,18 +7,27 @@ import {
   PhaseCardFooter,
   PhaseCardHeader,
 } from "@/core/components/ui/phase-card";
-import { AdminTeamInfo, useTeams } from "../../providers/teams-provider";
+import {
+  AdminTeamInfo,
+  useAdminData,
+} from "../../providers/admin-data-provider";
 import { TeamLogo } from "@/core/components/ui/team-logo";
 import { useAdminSocket } from "../../providers/admin-socket-provider";
 import { useEffect, useLayoutEffect, useState } from "react";
 import { useAdminPhases } from "../../providers/admin-phases-provider";
 import { motion } from "motion/react";
 // Removed invalid import. Use JSON.parse instead.
+import { useAudio } from "@/core/providers/audio-provider";
 
 export function ChoosingClub() {
-  const { team1, team2 } = useTeams();
+  const { team1, team2 } = useAdminData();
   const { socket } = useAdminSocket();
   const { setPhase } = useAdminPhases();
+  const { playAudio, stopAudio } = useAudio()
+
+  useLayoutEffect(() => {
+    playAudio('/assets/audios/Team Selection/Team Name Selection.mp3')
+  }, []);
 
   useLayoutEffect(() => {
     if (!socket) return;
@@ -31,6 +40,7 @@ export function ChoosingClub() {
       })
     );
     setPhase("main_questions");
+    stopAudio()
   }
   const [clubs, setClubs] = useState<{
     team1: Club | null,
